@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #Record the temperature from our raspberry pi
 tfile = open("/sys/bus/w1/devices/28-03159138f4ff/w1_slave")
 text = tfile.read()
