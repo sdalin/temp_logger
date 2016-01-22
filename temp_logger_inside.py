@@ -10,7 +10,7 @@ devices = [s for s in dirlist if s.startswith(hex(0x28)[2:])]
 tempLog = Logger('inside_temp_log.txt')
 
 while True:
-    startTime = time.clock()
+    startTime = time.time()
     tfile = open(directory + devices[0] + "/w1_slave")
     text = tfile.read()
     tfile.close()
@@ -24,7 +24,7 @@ while True:
     temperaturedata = secondline.split("=")[1]
     temperature = float(temperaturedata)/1000*1.8+32
     tempLog.write(str(temperature))
-    endTime = time.clock()
+    endTime = time.time()
     elapsedTime = endTime - startTime
     print "temp_logger_inside.py elapsed time: " + str(elapsedTime)
     time.sleep(max(5*60 - elapsedTime, 0))
