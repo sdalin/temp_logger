@@ -14,7 +14,7 @@ while True:
     text = tfile.read()
     secondline = text.split("\n")[1]
     temperaturedata = secondline.split("=")[1]
-    temperature = float(temperaturedata)/1000
+    temperature = float(temperaturedata)/1000*1.8+32
     tempLog.write(str(temperature))
     time.sleep(5*60)
 
