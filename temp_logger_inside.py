@@ -12,6 +12,9 @@ tempLog = Logger('inside_temp_log.txt')
 
 while True:
     text = tfile.read()
+    while not text:
+        print time.asctime() + ': couldn''t read from "' + directory + devices[0] + '/w1_slave". Trying again. '
+        text = tfile.read()
     secondline = text.split("\n")[1]
     temperaturedata = secondline.split("=")[1]
     temperature = float(temperaturedata)/1000*1.8+32
