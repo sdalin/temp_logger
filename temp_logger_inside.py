@@ -1,10 +1,21 @@
 #!/usr/bin/python
+from logger import Logger
+import time
+import os
+
 #Record the temperature from our raspberry pi
-tfile = open("/sys/bus/w1/devices/28-03159138f4ff/w1_slave")
-text = tfile.read()
+directory = '/sys/bus/w1/devices/'
+dirlist = os.listdir(directory)
+devices = [s for s in dirlist if s.startswith(hex(0x28)[2:])]
+tfile = open(directory + devices[0] + "/w1_slave")
+tempLog = Logger('inside_temp_log.txt')
+
+while True:
+    text = tfile.read()
+    secondline = text.split("\n")[1]
+    temperaturedata = secondline.split("=")[1]
+    temperature = float(temperaturedata)/1000
+    tempLog.write(str(temperature))
+    time.sleep(5*60)
+
 tfile.close()
-secondline = text.split("\n")[1]
-temperaturedata = secondline.split(" ")[9]
-temperature = float(temperaturedata[2:])
-temperature = temperature/1000
-print temperature
