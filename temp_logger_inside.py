@@ -11,6 +11,7 @@ tfile = open(directory + devices[0] + "/w1_slave")
 tempLog = Logger('inside_temp_log.txt')
 
 while True:
+    startTime = time.clock()
     text = tfile.read()
     while not text:
         print time.asctime() + ': couldn''t read from "' + directory + devices[0] + '/w1_slave". Trying again. '
@@ -19,6 +20,9 @@ while True:
     temperaturedata = secondline.split("=")[1]
     temperature = float(temperaturedata)/1000*1.8+32
     tempLog.write(str(temperature))
-    time.sleep(5*60)
+    endTime = time.clock()
+    elapsedTime = endTime - startTime
+    print "temp_logger_inside.py elapsed time: " + str(elapsedTime)
+    time.sleep(max(5*60 - elapsedTime, 0))
 
 tfile.close()
