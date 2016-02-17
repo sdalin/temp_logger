@@ -8,13 +8,14 @@ import time
 tempLog = Logger('outside_temp_log.txt')
 while True:
     startTime = time.time()
-    output = requests.get('http://api.wunderground.com/api/62875508aeaaee2d/conditions/q/pws:KMASOMER13.json')
-    dictionary = json.loads(output.text)
-    
-    if 'current_observation' not in dictionary:
+    try:
+        output = requests.get('http://api.wunderground.com/api/62875508aeaaee2d/conditions/q/pws:KMASOMER13.json')
+        dictionary = json.loads(output.text)
+        temperature = dictionary['current_observation']['temp_f']
+    except Exception as e:
+        print str(e)
         continue
 
-    temperature = dictionary['current_observation']['temp_f']
     tempLog.write(str(temperature))
     endTime = time.time()
     elapsedTime = endTime - startTime
