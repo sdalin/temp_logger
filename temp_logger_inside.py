@@ -27,4 +27,4 @@ while True:
     endTime = time.time()
     elapsedTime = endTime - startTime
     print "temp_logger_inside.py elapsed time: " + str(elapsedTime)
-    time.sleep(max(5*60 - elapsedTime, 0))
+    time.sleep(max(1*60 - elapsedTime, 0))
