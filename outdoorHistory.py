@@ -46,5 +46,6 @@ for month in (2, 3, 4):
             line = date['mon'] + '/' + date['mday'] + '/' + date['year'][2:4] + " " + date['hour'] + ':' + date['min']
             line += ' ' + str(unixtime) + '\t' + observations[i]['tempi'] + '\n'
             f.write(line)
+        time.sleep(6)   # 10 call/minute limit
 
 f.close()
