@@ -12,11 +12,12 @@ while True:
         output = requests.get('http://api.wunderground.com/api/62875508aeaaee2d/conditions/q/pws:KMASOMER13.json')
         dictionary = json.loads(output.text)
         temperature = dictionary['current_observation']['temp_f']
+        humidity = dictionary['current_observation']['relative_humidity']
     except Exception as e:
         print str(e)
         continue
 
-    tempLog.write(str(temperature))
+    tempLog.write(str(temperature) + ' ' + str(humidity))
     endTime = time.time()
     elapsedTime = endTime - startTime
     print "outdoorWeb.py elapsed time: " + str(elapsedTime)
