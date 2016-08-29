@@ -22,7 +22,7 @@ class DS18B20:
             tfile.close()
         secondline = text.split("\n")[1]
         temperaturedata = secondline.split("=")[1]
-        return float(temperaturedata)/1000, None
+        return float(temperaturedata)/1000
 
 
 #Record the temperature from our raspberry pi
@@ -47,8 +47,13 @@ tempLog = Logger('inside_temp_log.txt')
 while True:
     startTime = time.time()
     data = sensor.read()
-    temperature = float(data[0])*1.8+32
-    humidity = float(data[1])
+    if type(data) is tuple:
+        temperature = float(data[0])
+        humidity = float(data[1])
+    elif type(data) is float:
+        temperature = data
+        humidity = None
+    temperature = float(temperature)*1.8+32
     if humidity != None:
         tempLog.write('%.1f %.1f%%' % (temperature, humidity))
     else:
