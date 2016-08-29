@@ -5,6 +5,7 @@ import os
 
 class DS18B20:
     def __init__(self):
+        os.system('sudo modprobe w1-gpio && sudo modprobe w1-therm')    # refresh device listing
         directory = '/sys/bus/w1/devices/'
         dirlist = os.listdir(directory)
         devices = [s for s in dirlist if s.startswith(hex(0x28)[2:])]
@@ -28,7 +29,7 @@ class DS18B20:
 #Record the temperature from our raspberry pi
 try:
     sensor = DS18B20()
-except OSError:     # no such file or directory, i.e. no DS18B20 plugged in
+except IndexError:     # list index out of range, i.e. no DS18B20 plugged in
     import Adafruit_DHT
 
     class DHT:
