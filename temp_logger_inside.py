@@ -22,7 +22,7 @@ class DS18B20:
             tfile.close()
         secondline = text.split("\n")[1]
         temperaturedata = secondline.split("=")[1]
-        return temperaturedata/1000
+        return temperaturedata/1000, None
 
 
 #Record the temperature from our raspberry pi
@@ -38,7 +38,7 @@ except OSError:     # no such file or directory, i.e. no DS18B20 plugged in
 
         def read(self):
             humidity, temperature = Adafruit_DHT.read_retry(self.sensor, self.pin)
-            return temperature
+            return temperature, humidity
 
     sensor = DHT()
 
@@ -46,9 +46,13 @@ except OSError:     # no such file or directory, i.e. no DS18B20 plugged in
 tempLog = Logger('inside_temp_log.txt')
 while True:
     startTime = time.time()
-    temperaturedata = sensor.read()
-    temperature = float(temperaturedata)*1.8+32
-    tempLog.write('%.1f' % temperature)
+    data = sensor.read()
+    temperature = float(data[0])*1.8+32
+    humidity = float(data[1])
+    if humidity != None:
+        tempLog.write('%.1f %.1f%%' % (temperature, humidity))
+    else:
+        tempLog.write('%.1f' % temperature)
     endTime = time.time()
     elapsedTime = endTime - startTime
     print time.asctime() + ": temp_logger_inside.py elapsed time: " + str(elapsedTime)
