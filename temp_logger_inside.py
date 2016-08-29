@@ -22,7 +22,7 @@ class DS18B20:
             tfile.close()
         secondline = text.split("\n")[1]
         temperaturedata = secondline.split("=")[1]
-        return temperaturedata/1000, None
+        return float(temperaturedata)/1000, None
 
 
 #Record the temperature from our raspberry pi
