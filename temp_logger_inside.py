@@ -22,7 +22,7 @@ class DS18B20:
             tfile.close()
         secondline = text.split("\n")[1]
         temperaturedata = secondline.split("=")[1]
-        return temperaturedata
+        return temperaturedata/1000
 
 
 #Record the temperature from our raspberry pi
@@ -47,9 +47,9 @@ tempLog = Logger('inside_temp_log.txt')
 while True:
     startTime = time.time()
     temperaturedata = sensor.read()
-    temperature = float(temperaturedata)/1000*1.8+32
+    temperature = float(temperaturedata)*1.8+32
     tempLog.write(str(temperature))
     endTime = time.time()
     elapsedTime = endTime - startTime
-    print "temp_logger_inside.py elapsed time: " + str(elapsedTime)
+    print time.asctime() + ": temp_logger_inside.py elapsed time: " + str(elapsedTime)
     time.sleep(max(1*60 - elapsedTime, 0))
