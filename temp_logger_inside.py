@@ -8,6 +8,8 @@ class DS18B20:
         os.system('sudo modprobe w1-gpio && sudo modprobe w1-therm')    # refresh device listing
         directory = '/sys/bus/w1/devices/'
         dirlist = os.listdir(directory)
+        if dirlist == []:
+            print('You need to add "dtoverlay=w1-gpio" to /boot/config.txt and reboot if you want to use ds18b20.')
         devices = [s for s in dirlist if s.startswith(hex(0x28)[2:])]
         self.device = directory + devices[0] + "/w1_slave"
 
