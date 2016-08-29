@@ -48,7 +48,7 @@ while True:
     startTime = time.time()
     temperaturedata = sensor.read()
     temperature = float(temperaturedata)*1.8+32
-    tempLog.write(str(temperature))
+    tempLog.write('%.1f' % temperature)
     endTime = time.time()
     elapsedTime = endTime - startTime
     print time.asctime() + ": temp_logger_inside.py elapsed time: " + str(elapsedTime)
