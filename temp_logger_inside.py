@@ -11,7 +11,7 @@ except IndexError:     # list index out of range, i.e. no DS18B20 plugged in
     sensor = DHT()
 
 
-tempLog = Logger('log/inside_temp.txt')
+tempLog = Logger('logs/inside_temp.txt')
 while True:
     startTime = time.time()
     data = sensor.read()
