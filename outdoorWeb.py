@@ -5,7 +5,7 @@ from logger import Logger
 import time
 
 
-tempLog = Logger('outside_temp_log.txt')
+tempLog = Logger('logs/outside_temp.txt')
 while True:
     startTime = time.time()
     try:
