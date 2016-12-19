@@ -5,7 +5,8 @@ import os
 
 class DS18B20:
     def __init__(self):
-        os.system('sudo modprobe w1-gpio && sudo modprobe w1-therm')    # refresh device listing
+        os.system('modprobe w1-gpio')    # refresh device listing
+        os.system('modprobe w1-therm')    # refresh device listing
         directory = '/sys/bus/w1/devices/'
         dirlist = os.listdir(directory)
         if dirlist == []:
