@@ -1,6 +1,7 @@
 
 import time
 import os
+import Adafruit_DHT
 
 class DS18B20:
     def __init__(self):
@@ -28,7 +29,6 @@ class DS18B20:
 
 
 class DHT:
-    import Adafruit_DHT
     def __init__(self, sensor=Adafruit_DHT.DHT22, pin=4):
         self.sensor = sensor
         self.pin = pin

@@ -1,5 +1,8 @@
 .idea
 *.pyc
 *.DS_Store
+._*
+.*.swp
 nohup.out
 *.ino.*
+rpi-listen
