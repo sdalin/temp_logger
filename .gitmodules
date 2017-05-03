@@ -13,3 +13,6 @@
 [submodule "libraries/OneWire"]
 	path = libraries/OneWire
 	url = https://github.com/PaulStoffregen/OneWire.git
+[submodule "libraries/Arduino"]
+	path = libraries/Arduino
+	url = https://github.com/arduino/Arduino.git
