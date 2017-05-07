@@ -6,15 +6,16 @@
 # Date: 18th March 2015
 
 # where you installed the Arduino app
-ARDUINO_DIR = /Users/hsanders/Documents/projects/avr/Arduino-1.5.6/
+ARDUINO_DIR = ../libraries/Arduino/
 
 # various programs
+# requires a "sudo apt-get install gcc-avr" on debian
 CC = avr-gcc
 CXX = avr-g++
 AR = avr-ar
 OBJ_COPY = avr-objcopy
 
-MAIN_SKETCH = dht22readandsend.ino
+MAIN_SKETCH = generalTempReadandSend.ino
 
 # Archive flags
 ARFLAGS = rcs
@@ -41,19 +42,23 @@ BUILD_NAME = $(MCU)-$$(($(F_CPU)/1000000))MHz
 LIBNAME = libinocore$(BUILD_NAME).a
 
 
+# changed from EXTRA_DIRS = $(ARDUINO_DIR)/hardware/arduino/avr/libraries/SPI \ 
 EXTRA_DIRS = $(ARDUINO_DIR)/hardware/arduino/avr/libraries/SPI \
 			 ../libraries/RF24 \
-			 ../libraries/DHT-sensor-library
+			 ../libraries/DHT-sensor-library \
+			 ../libraries/DallasTemperature \
+			 ../libraries/OneWire
 
 OBJDIR = $(LIBRARY_DIR)/$(BUILD_NAME)objs
 
-_CXX_OBJS = RF24.o DHT.o SPI.o
+_CXX_OBJS = RF24.o SPI.o DallasTemperature.o DHT.o 
 CXX_OBJS = $(patsubst %,$(OBJDIR)/%,$(_CXX_OBJS))
-HEADERS = SPI.h DHT.h RF24.h nRF24L01.h
+HEADERS = SPI.h  RF24.h nRF24L01.h DallasTemperature.h OneWire.h DHT.h
 
 VPATH = $(LIBRARY_DIR) $(EXTRA_DIRS)
 
 build: $(HEADERS)
+	mkdir -p $(OBJDIR)
 	$(MAKE) build_library
 	#$(CPP) $(CPP_FLAGS) $(INCLUDE_FILES) $(MAIN_SKETCH) -o $(MAIN_SKETCH).o
 	$(CXX) $(CXXFLAGS) $(INCLUDE_FILES) -x c++ -include Arduino.h $(MAIN_SKETCH) -o $(MAIN_SKETCH).o
@@ -62,12 +67,16 @@ build: $(HEADERS)
 	$(OBJ_COPY) -O ihex -R .eeprom $(MAIN_SKETCH).elf $(MAIN_SKETCH).hex
 	rm *.d *.o
 
+
 build_library: $(CXX_OBJS)
 	$(AR) $(ARFLAGS) $(LIBRARY_DIR)/$(LIBNAME) $^
 
 $(OBJDIR)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-
+clean:
+	rm -f $(OBJDIR)/*
+	rm -f $(LIBRARY_DIR)/$(LIBNAME)
+	rm *.d *.o
 
 
