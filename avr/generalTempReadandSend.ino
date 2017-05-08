@@ -1,6 +1,8 @@
 // Uncomment one of the following two lines
-#define DS18B20
-// #define DHT
+//#define USING_DS18B20
+#define USING_DHT
+
+//#define USING_SERIAL
 
 #include <SPI.h>
 #include "nRF24L01.h"
@@ -10,18 +12,18 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
  
-#ifdef DHT
+#ifdef USING_DHT
 #include "DHT.h"
-#endif /* DHT */
-#ifdef DS18B20
+#endif /* USING_DHT */
+#ifdef USING_DS18B20
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#endif /* DS18B20 */
+#endif /* USING_DS18B20 */
 
 
 #define LEDPIN 2	 // digital pin with an LED
 
-#ifdef DHT
+#ifdef USING_DHT
 // Connect pin 1 (on the left) of the sensor to VCC
 // to 3.3V instead of 5V!
 // Connect pin 2 of the sensor to whatever your DHTPIN is
@@ -34,14 +36,14 @@
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 // Initialize DHT sensor.
 DHT sensor(DHTPIN, DHTTYPE);
-#endif /* DHT */
-#ifdef DS18B20
+#endif /* USING_DHT */
+#ifdef USING_DS18B20
 #define ONE_WIRE_BUS 3
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensor(&oneWire);
-#endif /* DS18B20 */
+#endif /* USING_DS18B20 */
 
 float temperature;
 float humidity;
@@ -71,7 +73,9 @@ ISR(WDT_vect) {
   if(f_wdt == 0) {
     f_wdt=1;
   } else {
-    //Serial.println("WDT Overrun!!!");
+#ifdef USING_SERIAL
+    Serial.println("WDT Overrun!!!");
+#endif /* USING_SERIAL */
   }
 }
  
@@ -104,7 +108,9 @@ void setupRadio() {
   radio.openWritingPipe(pipes[nodeIndex]);
   radio.openReadingPipe(1,pipes[0]);
   radio.startListening();
+#ifdef USING_SERIAL
   radio.printDetails();
+#endif /* USING_SERIAL */
 }
 
 void setupSensor() {
@@ -170,12 +176,12 @@ void sendOverRadio() {
   sprintf(temp,"%03d",data1);
   strcat(outBuffer,temp);
   strcat(outBuffer,",");
- 
+
   //read sensor
   strcat(outBuffer,dtostrf(temperature, 4,2, buffer));
   strcat(outBuffer,",");
   strcat(outBuffer,dtostrf(humidity, 4,2, buffer));
- 
+
   // Stop listening and write to radio
   radio.stopListening();
  
@@ -209,11 +215,11 @@ void readSensor() {
   digitalWrite(LEDPIN, HIGH);
   delay(200);
   bool farenheit = true;
-#ifdef DHT
-  temperature = dht.readTemperature(farenheit);
-  humidity = dht.readHumidity();
-#endif /* DHT */
-#ifdef DS18B20
+#ifdef USING_DHT
+  temperature = sensor.readTemperature(farenheit);
+  humidity = sensor.readHumidity();
+#endif /* USING_DHT */
+#ifdef USING_DS18B20
   sensor.requestTemperatures(); // Send the command to get temperatures
   // the following assumes there is only one OneWire device connected
   if ( farenheit ) {
@@ -222,6 +228,6 @@ void readSensor() {
     temperature = sensor.getTempCByIndex(0);
   }
   humidity = NAN;
-#endif /* DS18B20 */
+#endif /* USING_DS18B20 */
   digitalWrite(LEDPIN, LOW);
 }

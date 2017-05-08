@@ -16,3 +16,5 @@
 [submodule "libraries/Arduino"]
 	path = libraries/Arduino
 	url = https://github.com/arduino/Arduino.git
+	shallow = true
+	branch = refs/tags/1.5.6

@@ -39,8 +39,7 @@ CXXFLAGS = $(GENERAL_FLAGS) -fno-exceptions $(INCLUDE_FILES) $(patsubst %,-I%,$(
 CFLAGS  = $(GENERAL_FLAGS) $(INCLUDE_FILES) $(patsubst %,-I%,$(EXTRA_DIRS))
 
 # location of include files
-CORE_SRC_DIR = $(ARDUINO_DIR)hardware/arduino/avr/cores/arduino
-INCLUDE_FILES = "-I$(CORE_SRC_DIR)" \
+INCLUDE_FILES = "-I$(ARDUINO_DIR)hardware/arduino/avr/cores/arduino" \
 			    "-I$(ARDUINO_DIR)hardware/arduino/avr/variants/standard" 
 
 # library sources
@@ -49,37 +48,30 @@ LIBRARY_DIR = $(ARDUINO_DIR)hardware/arduino/avr/variants/standard
 BUILD_NAME = $(MCU)-$$(($(F_CPU)/1000000))MHz
 LIBNAME = libinocore$(BUILD_NAME).a
 
-# sometimes EXTRA_DIRS = $(ARDUINO_DIR)/hardware/arduino/avr/libraries/SPI \
-EXTRA_DIRS = $(ARDUINO_DIR)/hardware/arduino/avr/libraries/SPI/src \
+EXTRA_DIRS = $(ARDUINO_DIR)/hardware/arduino/avr/libraries/SPI \
 			 $(wildcard ../libraries/*)
 
 OBJDIR = $(LIBRARY_DIR)/$(BUILD_NAME)objs
 
 
-CORE_C_FILES = $(wildcard $(CORE_SRC_DIR)/*.c)
-CORE_CXX_FILES = $(wildcard $(CORE_SRC_DIR)/*.cpp)
-CORE_C_OBJS = $(patsubst $(CORE_SRC_DIR)/%.c,$(OBJDIR)/%.o,$(CORE_C_FILES))
-CORE_CXX_OBJS = $(patsubst $(CORE_SRC_DIR)/%.cpp,$(OBJDIR)/%.o,$(CORE_CXX_FILES))
-CORE_OBJS = $(CORE_C_OBJS) $(CORE_CXX_OBJS)
-
-#_CORE_C_FILES = avr-libc/malloc avr-libc/realloc WInterrupts hooks wiring \
+CORE_C_FILES = avr-libc/malloc avr-libc/realloc WInterrupts hooks wiring \
 	   wiring_analog wiring_digital wiring_pulse wiring_shift CDC
-#_CORE_C_OBJS = malloc.o realloc.o WInterrupts.o hooks.o wiring.o \
+_CORE_C_OBJS = malloc.o realloc.o WInterrupts.o hooks.o wiring.o \
 	   wiring_analog.o wiring_digital.o wiring_pulse.o wiring_shift.o 
-#_CORE_CXX_OBJS = CDC.o HardwareSerial.o HID.o IPAddress.o main.o new.o Print.o \
+_CORE_CXX_OBJS = CDC.o HardwareSerial.o HID.o IPAddress.o main.o new.o Print.o \
 		   Stream.o Tone.o USBCore.o WMath.o WString.o
-#_CORE_OBJS = $(_CORE_C_OBJS) $(_CORE_CXX_OBJS)
+_CORE_OBJS = $(_CORE_C_OBJS) $(_CORE_CXX_OBJS)
 #CORE_C_OBJS = $(patsubst %,$(OBJDIR)/%,$(_CORE_C_OBJS))
 #CORE_CXX_OBJS = $(patsubst %,$(OBJDIR)/%,$(_CORE_CXX_OBJS)
-#CORE_OBJS = $(patsubst %,$(OBJDIR)/%,$(_CORE_OBJS))
+CORE_OBJS = $(patsubst %,$(OBJDIR)/%,$(_CORE_OBJS))
 
-_CXX_OBJS = RF24.o SPI.o DallasTemperature.o OneWire.o DHT.o 
+_CXX_OBJS = RF24.o SPI.o DallasTemperature.o DHT.o 
 CXX_OBJS = $(patsubst %,$(OBJDIR)/%,$(_CXX_OBJS))
 HEADERS = SPI.h  RF24.h nRF24L01.h DallasTemperature.h OneWire.h DHT.h
 
-VPATH = $(CORE_SRC_DIR) $(CORE_SRC_DIR)/avr-libc  $(EXTRA_DIRS)
+VPATH = $(LIBRARY_DIR) $(LIBRARY_DIR)/avr-libc $(EXTRA_DIRS)
 
-all: $(HEADERS)
+build: $(HEADERS)
 	mkdir -p $(OBJDIR)
 	$(MAKE) build_library
 	#$(CPP) $(CPP_FLAGS) $(INCLUDE_FILES) $(MAIN_SKETCH) -o $(MAIN_SKETCH).o
