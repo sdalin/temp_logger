@@ -9,7 +9,7 @@ tempLog = Logger('logs/outside_temp.txt')
 while True:
     startTime = time.time()
     try:
-        output = requests.get('http://api.wunderground.com/api/62875508aeaaee2d/conditions/q/pws:KMASOMER13.json')
+        output = requests.get('http://api.wunderground.com/api/62875508aeaaee2d/conditions/q/MA/Somerville.json')
         dictionary = json.loads(output.text)
         temperature = dictionary['current_observation']['temp_f']
         humidity = dictionary['current_observation']['relative_humidity']
