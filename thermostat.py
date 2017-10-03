@@ -1,4 +1,7 @@
 #!/usr/local/bin/python
+
+from determineThresh import determineThreshRoom
+
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
@@ -12,9 +15,10 @@ try:
 except IndexError:     # list index out of range, i.e. no DS18B20 plugged in
     sensor = DHT()
 
+#temperature setting in F and room to read temp from
+[thresh,readRoom] = determineThreshRoom()
 
 log = Logger('logs/thermostat.txt')
-thresh = 68     # temperature setting in Farenheit
 
 GPIO.setmode(GPIO.BCM)
 pin = 21

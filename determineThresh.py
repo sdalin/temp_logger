@@ -1,3 +1,8 @@
+#!/usr/local/bin/python
+
+#reads thermostatProgram.txt to output a threshold temperature and
+#room to read temp from, based on current day/time
+
 def determineThreshRoom():
     import time
 
