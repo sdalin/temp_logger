@@ -14,14 +14,21 @@ else:
     dayType = 'week'
 
 #Load thermostat program into nested dict
+programDict = {}
 with open(programFile) as f:
     program = list(f)
-    for line in 1:len(program):
+    for line in range(1,len(program)):
+        lineData = program[line]
+        if program[1].split()[0] in programDict:
+            lineArray = lineData.split()
+            programDict[lineArray[0]][lineArray[1]] = lineArray[2]
+            programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
+        else:
+            lineArray = lineData.split()
+            programDict[lineArray[0]] = {}
+            programDict[lineArray[0]][lineArray[1]] = lineArray[2]
+            programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
 
-        here extract 'outer keys' aka week & end
-        then extract 'inner keys' aka dateTimeSplit
-        then load temps and rooms into those keys
 
-    outerKeys = (line.split(',')[0] for line in f)
-
-use dict to access day/time to get thresh and room
+#use dict to access day/time to get thresh and room
+thresh = programDict[dayType]
