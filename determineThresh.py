@@ -5,6 +5,8 @@
 
 def determineThreshRoom():
     import time
+    import requests
+    import json
 
     programFile = "./thermostatProgram.txt"
     dateTime = time.ctime()
@@ -12,7 +14,7 @@ def determineThreshRoom():
 
     #Determine time and day of week
     day = dateTimeSplit[0]
-    time = dateTimeSplit[3]
+    currentTime = dateTimeSplit[3]
 
     if day == "Sat,Sun":
         dayType = 'end'
@@ -36,12 +38,47 @@ def determineThreshRoom():
                 programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
 
 
-    #use dict to access day/time to get thresh and room
+    #If its a chag, revert to weekend day type
+    output = requests.get('http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on')
+    dictionary = json.loads(output.text)
+    currentDate = time.strftime("%Y-%m-%d", time.gmtime())
+    prevDay = str(int(currentDate[8:10])-1)
+    if len(prevDay) < 2:
+        temp = '0'
+        temp += prevDay
+        prevDay = temp
+    yesterday = currentDate[0:8]
+    yesterday += prevDay
+
+    #make dict of this year's holiday dates and candle lighting times
+    holidays = {}
+    key = 0
+    while key < len(dictionary['items']):
+        key += 1
+        if dictionary['items'][key-1]['title'][0:6] == 'Candle':
+            holidays[dictionary['items'][key-1]['date'][0:10]] = dictionary['items'][key-1]['title'][17:22]
+        else:
+            continue
+
+
+    #check if there was candle lighting yesterday
+    holidayDates = holidays.keys()
+    if yesterday in holidayDates:
+        dayType = 'end'
+
+
+
+
+
+
+
+
+    # use dict to access day/time to get thresh and room
     dayTimes = programDict[dayType].keys()
 
     #list all time keys less than the current time, sort then select biggest
     #to find most recent time
-    list = [x for x in dayTimes if x < time]
+    list = [x for x in dayTimes if x < currentTime]
     list.sort()
     timeType = list[-1]
 
@@ -51,4 +88,3 @@ def determineThreshRoom():
 
     #return threshhold temp and room to read from
     return thresh, readRoom
-
