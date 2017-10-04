@@ -87,5 +87,5 @@ def determineThreshRoom():
     thresh = programDict[dayType][timeType][0]
     readRoom = programDict[dayType][timeType][1]
 
-    # return threshhold temp and room to read from
-    return thresh, readRoom
+    # return threshold temp and room to read from
+    return float(thresh), readRoom

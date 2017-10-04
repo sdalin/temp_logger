@@ -1,5 +1,4 @@
 #!/usr/local/bin/python
-# TODO: check state of actuators (i.e. heater)
 from determineThresh import determineThreshRoom
 
 try:
@@ -63,8 +62,10 @@ def readRoom(room='dining'):
 log = Logger('logs/thermostat.txt')
 
 GPIO.setmode(GPIO.BCM)
-pin = 21
-GPIO.setup(pin, GPIO.OUT, initial=False)
+readPin = 24
+writePin = 23
+GPIO.setup(writePin, GPIO.OUT, initial=False)
+GPIO.setup(readPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 while True:
     startTime = time.time()
     # temperature setting in F and room to read temp from
@@ -72,13 +73,17 @@ while True:
     temperature = readRoom(room)
     if temperature is not None:
         if temperature < thresh:
-            GPIO.output(pin, True)
+            #GPIO.output(writePin, True)
             log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
         else:
-            GPIO.output(pin, False)
+            #GPIO.output(writePin, False)
             log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
     else:
         log.write(time.asctime() + ": thermostat.py sensor read failed.")
+    if GPIO.input(readPin):
+        log.write('Magic 8 ball says heater is probably on.')
+    else:
+        log.write('Magic 8 ball says heater is probably off.')
     endTime = time.time()
     elapsedTime = endTime - startTime
     print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
