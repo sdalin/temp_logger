@@ -3,6 +3,7 @@ import time
 import os
 import Adafruit_DHT
 
+
 class DS18B20:
     def __init__(self):
         os.system('sudo modprobe w1-gpio && sudo modprobe w1-therm')    # refresh device listing
