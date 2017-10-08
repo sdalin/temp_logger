@@ -113,7 +113,7 @@ class Actuators:
 controlType = 'cooling'
 
 log = Logger('logs/thermostat.txt')
-
+buffer = 1
 with ActuatorsContextManager() as actuators:
     while True:
         startTime = time.time()
@@ -122,20 +122,23 @@ with ActuatorsContextManager() as actuators:
         temperature = readRoom(room)
         if temperature is not None:
             if controlType == 'heating':
-                if temperature < thresh:
+                if temperature < thresh - buffer:
                     #actuators.heatOn()
                     log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
-                else:
+                elif temperature > thresh + buffer:
                     #actuators.heatOff()
                     log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
-
+                else:
+                    log.write('No heating change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
             elif controlType == 'cooling':
-                if temperature > thresh:
+                if temperature > thresh + buffer:
                     actuators.coolOn()
                     log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
-                else:
+                elif temperature < thresh - buffer:
                     actuators.coolOff()
                     log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+                else:
+                    log.write('No cooling change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
         else:
             log.write(time.asctime() + ": thermostat.py sensor read failed.")
         if actuators.heatOnBool():
