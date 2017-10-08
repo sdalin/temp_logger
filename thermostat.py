@@ -58,47 +58,91 @@ def readRoom(room='dining'):
     else:
         raise ValueError
 
+
+class ActuatorsContextManager:
+    def __init__(self):
+        pass
+
+    def __enter__(self):
+        GPIO.setmode(GPIO.BCM)
+        return Actuators()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        GPIO.cleanup()
+
+
+class Actuators:
+    def __init__(self):
+        self.heatReadPin = 24
+        self.heatOnPin = 23
+        self.coolOnPin = 5
+        self.coolOffPin = 6
+        GPIO.setup(self.heatWritePin, GPIO.OUT, initial=False)
+        GPIO.setup(self.coolOnPin, GPIO.OUT, initial=False)
+        GPIO.setup(self.coolOffPin, GPIO.OUT, initial=False)
+        GPIO.setup(self.heatReadPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    def coolOn(self):
+        # turns cooling on
+        GPIO.output(self.coolOnPin, False)
+        GPIO.output(self.coolOffPin, False)
+        GPIO.output(self.coolOnPin, True)
+        time.sleep(1)
+        GPIO.output(self.coolOnPin, False)
+
+    def coolOff(self):
+        # turns cooling off
+        GPIO.output(self.coolOnPin, False)
+        GPIO.output(self.coolOffPin, False)
+        GPIO.output(self.coolOffPin, True)
+        time.sleep(1)
+        GPIO.output(self.coolOffPin, False)
+
+    def heatOn(self):
+        # turns heat on
+        GPIO.output(self.heatOnPin, True)
+
+    def heatOff(self):
+        # turns heat off
+        GPIO.output(self.heatOnPin, False)
+
+    def heatOnBool(self):
+        # checks if heat is on
+        return GPIO.input(self.heatReadPin)
+
 controlType = 'cooling'
 
 log = Logger('logs/thermostat.txt')
 
-GPIO.setmode(GPIO.BCM)
-readPin = 24
-writePin = 23
-GPIO.setup(writePin, GPIO.OUT, initial=False)
-GPIO.setup(readPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-while True:
-    startTime = time.time()
-    # temperature setting in F and room to read temp from
-    [thresh, room] = determineThreshRoom(controlType)
-    temperature = readRoom(room)
-    if temperature is not None:
-        if controlType == 'heating':
-            if temperature < thresh:
-                #GPIO.output(writePin, True)
-                log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
-            else:
-                #GPIO.output(writePin, False)
-                log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+with ActuatorsContextManager() as actuators:
+    while True:
+        startTime = time.time()
+        # temperature setting in F and room to read temp from
+        [thresh, room] = determineThreshRoom(controlType)
+        temperature = readRoom(room)
+        if temperature is not None:
+            if controlType == 'heating':
+                if temperature < thresh:
+                    #actuators.heatOn()
+                    log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+                else:
+                    #actuators.heatOff()
+                    log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
 
-        elif controlType == 'cooling':
-            if temperature > thresh:
-                    #GPIO.output(writePin, True)
+            elif controlType == 'cooling':
+                if temperature > thresh:
+                    actuators.coolOn()
                     log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
                 else:
-                    #GPIO.output(writePin, False)
+                    actuators.coolOff()
                     log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
-
-
-    else:
-        log.write(time.asctime() + ": thermostat.py sensor read failed.")
-    if GPIO.input(readPin):
-        log.write('Magic 8 ball says heater is probably on.')
-    else:
-        log.write('Magic 8 ball says heater is probably off.')
-    endTime = time.time()
-    elapsedTime = endTime - startTime
-    print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
-    time.sleep(max(1*60 - elapsedTime, 0))
-
-GPIO.cleanup()
+        else:
+            log.write(time.asctime() + ": thermostat.py sensor read failed.")
+        if actuators.heatOnBool():
+            log.write('Magic 8 ball says heater is probably on.')
+        else:
+            log.write('Magic 8 ball says heater is probably off.')
+        endTime = time.time()
+        elapsedTime = endTime - startTime
+        print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
+        time.sleep(max(1*60 - elapsedTime, 0))
