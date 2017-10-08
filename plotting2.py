@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from functions import p2f
+import time
 
 DEBUG = True
 
@@ -41,7 +42,9 @@ varList = [bedroom, diningroom, outside, basement]
 varStringsList = ['bedroom', 'diningroom', 'outside', 'basement']
 fig1 = plt.figure()
 for var in varList:
-    plt.plot(var.DateTime, var.Temperature)
+    varTemp = var
+    #varTemp = var[var.UnixTime > time.time()-2*24*60*60]
+    plt.plot(varTemp.DateTime, varTemp.Temperature)
 plt.legend(varStringsList)
 plt.ylim(0, 100)
 
