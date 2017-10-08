@@ -44,7 +44,7 @@ def determineThreshRoom(controlType):
     output = requests.get('http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on')
     dictionary = json.loads(output.text)
 
-    yesterday = date.today() - timedelta(1)
+    yesterday = datetime.datetime.today() - datetime.timedelta(1)
     prevDay = yesterday.strftime("%Y-%m-%d")
     yesterday = prevDay
 
