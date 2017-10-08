@@ -70,7 +70,7 @@ GPIO.setup(readPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 while True:
     startTime = time.time()
     # temperature setting in F and room to read temp from
-    [thresh, room] = determineThreshRoom()
+    [thresh, room] = determineThreshRoom(controlType)
     temperature = readRoom(room)
     if temperature is not None:
         if controlType == 'heating':

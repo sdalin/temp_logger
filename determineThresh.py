@@ -3,12 +3,16 @@
 #reads thermostatProgram.txt to output a threshold temperature and
 #room to read temp from, based on current day/time
 
-def determineThreshRoom():
-    import time
+def determineThreshRoom(controlType):
+    from datetime import datetime, timedelta
     import requests
     import json
 
-    programFile = "./thermostatProgram.txt"
+    if controlType == 'cooling':
+        programFile = "./fanProgram.txt"
+    elif controlType == 'heating':
+        programFile = "./thermostatProgram.txt"
+
     dateTime = time.ctime()
     dateTimeSplit = dateTime.split()
 
@@ -42,15 +46,10 @@ def determineThreshRoom():
     # TODO: cache result of API response processing for rest of day
     output = requests.get('http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on')
     dictionary = json.loads(output.text)
-    currentDate = time.strftime("%Y-%m-%d", time.gmtime())
-    # TODO: deal with first day of month
-    prevDay = str(int(currentDate[8:10])-1)
-    if len(prevDay) < 2:
-        temp = '0'
-        temp += prevDay
-        prevDay = temp
-    yesterday = currentDate[0:8]
-    yesterday += prevDay
+
+    yesterday = date.today() - timedelta(1)
+    prevDay = yesterday.strftime("%Y-%m-%d")
+    yesterday = prevDay
 
     # make dict of this year's holiday dates and candle lighting times
     holidays = {}
