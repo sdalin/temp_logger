@@ -58,6 +58,7 @@ def readRoom(room='dining'):
     else:
         raise ValueError
 
+controlType = 'cooling'
 
 log = Logger('logs/thermostat.txt')
 
@@ -72,12 +73,23 @@ while True:
     [thresh, room] = determineThreshRoom()
     temperature = readRoom(room)
     if temperature is not None:
-        if temperature < thresh:
-            #GPIO.output(writePin, True)
-            log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
-        else:
-            #GPIO.output(writePin, False)
-            log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+        if controlType == 'heating':
+            if temperature < thresh:
+                #GPIO.output(writePin, True)
+                log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+            else:
+                #GPIO.output(writePin, False)
+                log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+
+        elif controlType == 'cooling':
+            if temperature > thresh:
+                    #GPIO.output(writePin, True)
+                    log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+                else:
+                    #GPIO.output(writePin, False)
+                    log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+
+
     else:
         log.write(time.asctime() + ": thermostat.py sensor read failed.")
     if GPIO.input(readPin):
