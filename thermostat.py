@@ -77,7 +77,7 @@ class Actuators:
         self.heatOnPin = 23
         self.coolOnPin = 5
         self.coolOffPin = 6
-        GPIO.setup(self.heatWritePin, GPIO.OUT, initial=False)
+        GPIO.setup(self.heatOnPin, GPIO.OUT, initial=False)
         GPIO.setup(self.coolOnPin, GPIO.OUT, initial=False)
         GPIO.setup(self.coolOffPin, GPIO.OUT, initial=False)
         GPIO.setup(self.heatReadPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
