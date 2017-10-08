@@ -2,23 +2,20 @@
 
 #reads thermostatProgram.txt to output a threshold temperature and
 #room to read temp from, based on current day/time
+import datetime
+import requests
+import json
 
 def determineThreshRoom(controlType):
-    from datetime import datetime, timedelta
-    import requests
-    import json
-
     if controlType == 'cooling':
         programFile = "./fanProgram.txt"
     elif controlType == 'heating':
         programFile = "./thermostatProgram.txt"
 
-    dateTime = time.ctime()
-    dateTimeSplit = dateTime.split()
-
     # Determine time and day of week
-    day = dateTimeSplit[0]
-    currentTime = dateTimeSplit[3]
+    currentDateTime = datetime.datetime.now()
+    currentTime = currentDateTime.strftime("%H:%M:%S")
+    day = currentDateTime.strftime("%a")
 
     if day in ["Sat", "Sun"]:
         dayType = 'end'
