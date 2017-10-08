@@ -82,13 +82,15 @@ while True:
                 log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
 
         elif controlType == 'cooling':
-            if temperature > thresh:
-                    #GPIO.output(writePin, True)
-                    log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
-                else:
-                    #GPIO.output(writePin, False)
-                    log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
-
+            if temperature > thresh && outdoorTemp < 80:
+                #GPIO.output(writePin, True)
+                log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+            elif temperature < thresh:
+                #GPIO.output(writePin, False)
+                log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+            elif outdoorTemp > 80:
+                #GPIO.output(writePin, False)
+                log.write('Cooling off: %.1f degrees outside is above 80F.' % (outdoorTemp))
 
     else:
         log.write(time.asctime() + ": thermostat.py sensor read failed.")
