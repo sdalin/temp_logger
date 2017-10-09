@@ -47,6 +47,8 @@ def readBed():
         temp = float(textList[5])
         hum = float(textList[6])
         # TODO: deal with lack of data, i.e. set up email alerts
+    else:
+        print(textList)
     return temp
 
 
