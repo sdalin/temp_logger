@@ -6,6 +6,6 @@ week    17:00   71  bed
 week    23:30   71  bed
 end 00:00   71  bed
 end 10:00   80  bed
-end 2:00    71  bed
-end 6:00    71  bed
+end 14:00   71  bed
+end 20:00   71  bed
 end 23:30   71  bed
