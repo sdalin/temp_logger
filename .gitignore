@@ -6,3 +6,4 @@
 nohup.out
 *.ino.*
 rpi-listen
+logs/*

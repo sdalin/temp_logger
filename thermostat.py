@@ -1,5 +1,6 @@
 #!/usr/local/bin/python
 from determineThresh import determineThreshRoom
+from functions import *
 
 try:
     import RPi.GPIO as GPIO
@@ -12,6 +13,7 @@ from logger import Logger
 
 import sys
 import subprocess
+import traceback
 
 try:
     sensor = DS18B20()
@@ -115,39 +117,50 @@ class Actuators:
 controlType = 'cooling'
 
 log = Logger('logs/thermostat.txt')
-buffer = 1
+hysteresis = 1      # amount that the temp can be off from set point before triggering actuator
+nFailures = 0
 with ActuatorsContextManager() as actuators:
     while True:
-        startTime = time.time()
-        # temperature setting in F and room to read temp from
-        [thresh, room] = determineThreshRoom(controlType)
-        temperature = readRoom(room)
-        if temperature is not None:
-            if controlType == 'heating':
-                if temperature < thresh - buffer:
-                    #actuators.heatOn()
-                    log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
-                elif temperature > thresh + buffer:
-                    #actuators.heatOff()
-                    log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
-                else:
-                    log.write('No heating change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
-            elif controlType == 'cooling':
-                if temperature > thresh + buffer:
-                    actuators.coolOn()
-                    log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
-                elif temperature < thresh - buffer:
-                    actuators.coolOff()
-                    log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
-                else:
-                    log.write('No cooling change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
-        else:
-            log.write(time.asctime() + ": thermostat.py sensor read failed.")
-        if actuators.heatOnBool():
-            log.write('Magic 8 ball says heater is probably on.')
-        else:
-            log.write('Magic 8 ball says heater is probably off.')
-        endTime = time.time()
-        elapsedTime = endTime - startTime
-        print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
-        time.sleep(max(1*60 - elapsedTime, 0))
+        try:
+            startTime = time.time()
+            # temperature setting in F and room to read temp from
+            [thresh, room] = determineThreshRoom(controlType)
+            temperature = readRoom(room)
+            if temperature is not None:
+                if controlType == 'heating':
+                    if temperature < thresh - hysteresis:
+                        #actuators.heatOn()
+                        log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+                    elif temperature > thresh + hysteresis:
+                        #actuators.heatOff()
+                        log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+                    else:
+                        log.write('No heating change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
+                elif controlType == 'cooling':
+                    if temperature > thresh + hysteresis:
+                        actuators.coolOn()
+                        log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+                    elif temperature < thresh - hysteresis:
+                        actuators.coolOff()
+                        log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+                    else:
+                        log.write('No cooling change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
+            else:
+                log.write(time.asctime() + ": thermostat.py sensor read failed.")
+            if actuators.heatOnBool():
+                log.write('Magic 8 ball says heater is probably on.')
+            else:
+                log.write('Magic 8 ball says heater is probably off.')
+            endTime = time.time()
+            elapsedTime = endTime - startTime
+            print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
+            time.sleep(max(1*60 - elapsedTime, 0))
+        except Exception:
+            nFailures += 1
+            text = 'Failure ' + nFailures + '\n' + traceback.format_exc()
+            log.write(text)
+            if nFailures > 5:
+                sendEmail('Thermostat Shutdown', text)
+                raise
+            else:
+                sendEmail('Thermostat Error', text)
