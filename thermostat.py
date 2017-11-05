@@ -157,9 +157,9 @@ with ActuatorsContextManager() as actuators:
             time.sleep(max(1*60 - elapsedTime, 0))
         except Exception:
             nFailures += 1
-            text = 'Failure ' + nFailures + '\n' + traceback.format_exc()
+            text = 'Failure ' + str(nFailures) + '\n' + traceback.format_exc()
             log.write(text)
-            if nFailures > 5:
+            if nFailures >= 3:
                 sendEmail('Thermostat Shutdown', text)
                 raise
             else:
