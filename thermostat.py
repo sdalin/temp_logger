@@ -50,7 +50,7 @@ def readBed():
         hum = float(textList[6])
         # TODO: deal with lack of data, i.e. set up email alerts
     else:
-        print(textList)
+        sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
     return temp
 
 
@@ -155,6 +155,13 @@ with ActuatorsContextManager() as actuators:
             elapsedTime = endTime - startTime
             print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
             time.sleep(max(1*60 - elapsedTime, 0))
+        except UnboundLocalError:
+            nFailures += 1
+            if nFailures >= 3:
+                sendEmail('Thermostat Shutdown', 'No recent temperature data coming in over radio. ')
+                raise
+            else:
+                pass
         except Exception:
             nFailures += 1
             text = 'Failure ' + str(nFailures) + '\n' + traceback.format_exc()
