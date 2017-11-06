@@ -114,13 +114,14 @@ class Actuators:
         # checks if heat is on
         return GPIO.input(self.heatReadPin)
 
-controlType = 'cooling'
+#controlType = 'cooling'
+controlType = 'heating'
 
 log = Logger('logs/thermostat.txt')
 hysteresis = 1      # amount that the temp can be off from set point before triggering actuator
 nFailures = 0
 with ActuatorsContextManager() as actuators:
-    while True:
+    while True and __name__ == "__main__":
         try:
             startTime = time.time()
             # temperature setting in F and room to read temp from
