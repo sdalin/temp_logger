@@ -5,6 +5,19 @@
 import datetime
 import requests
 import json
+import codecs
+
+def makeJSONDict(jsonOutput):
+    # make dict of this year's holiday dates and candle lighting times
+    holidays = {}
+    key = 0
+    while key < len(jsonOutput['items']):
+        key += 1
+        if jsonOutput['items'][key - 1]['title'][0:6] == 'Candle':
+            holidays[jsonOutput['items'][key - 1]['date'][0:10]] = jsonOutput['items'][key - 1]['title'][17:22]
+        else:
+            continue
+    return holidays
 
 def determineThreshRoom(controlType):
     if controlType == 'cooling':
@@ -39,33 +52,56 @@ def determineThreshRoom(controlType):
 
 
     # If it's a chag, revert to weekend day type
-    # TODO: try/except api request
-    # TODO: cache result of API response processing for rest of day
-    output = requests.get('http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on')
-    dictionary = json.loads(output.text)
 
+    #Determine Date
+    Today = datetime.datetime.today()
     yesterday = datetime.datetime.today() - datetime.timedelta(1)
     prevDay = yesterday.strftime("%Y-%m-%d")
+    todayYMD = Today.strftime("%Y-%m-%d")
     yesterday = prevDay
 
-    # make dict of this year's holiday dates and candle lighting times
-    holidays = {}
-    key = 0
-    while key < len(dictionary['items']):
-        key += 1
-        if dictionary['items'][key-1]['title'][0:6] == 'Candle':
-            holidays[dictionary['items'][key-1]['date'][0:10]] = dictionary['items'][key-1]['title'][17:22]
-        else:
-            continue
+    #Read the chag days JSON already stored
+    f = codecs.open('chagDays','r', 'utf-8')
+    output = f.read()
+    dictionary = json.loads(output)
+    f.close()
+
+    # make dict of the stored year's holiday dates and candle lighting times
+    holidays = makeJSONDict(dictionary)
+
+    # check if there was candle lighting in the past week in the stored data
+    holidayDates = holidays.keys()
+    dataCurrent = False
+    for day in range(7):
+        testDay = datetime.datetime.today() - datetime.timedelta(day)
+        testDayYMD = testDay.strftime("%Y-%m-%d")
+        if testDayYMD in holidayDates:
+            dataCurrent = True
+
+    #If there wasn't candle lighting in the past week in the stored data, we need new data
+    if dataCurrent == False:
+        try:
+            output = requests.get(
+                'http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on')
+        except requests.exceptions.ConnectionError:
+            # If the API request fails once its generally OK to use yesterdays' data.
+            pass
+
+        # Write new data and load into variable to create dict
+        f = codecs.open('chagDays', 'w', 'utf-8')
+        f.write(output)
+        f.close
+
+        dictionary = json.loads(output.text)
+
+        # make dict of the stored year's holiday dates and candle lighting times
+        holidays = makeJSONDict(dictionary)
+
 
     # check if there was candle lighting yesterday
     holidayDates = holidays.keys()
     if yesterday in holidayDates:
         dayType = 'end'
-
-
-
-
 
 
 
