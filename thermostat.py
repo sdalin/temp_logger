@@ -114,7 +114,8 @@ class Actuators:
         # checks if heat is on
         return GPIO.input(self.heatReadPin)
 
-controlType = 'cooling'
+#controlType = 'cooling'
+controlType = 'heating'
 
 log = Logger('logs/thermostat.txt')
 hysteresis = 1      # amount that the temp can be off from set point before triggering actuator
