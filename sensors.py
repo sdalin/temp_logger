@@ -30,7 +30,7 @@ class DS18B20:
 
 
 class DHT:
-    def __init__(self, sensor=Adafruit_DHT.DHT22, pin=4):
+    def __init__(self, sensor=Adafruit_DHT.DHT22, pin=26):
         self.sensor = sensor
         self.pin = pin
 
