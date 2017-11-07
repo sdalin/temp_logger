@@ -37,18 +37,19 @@ def readDining():
 
 
 def readBed():
+    filename = 'logs/temp_hum.txt'
+    searchterm = 'E2'
     if sys.platform == 'linux2':
-        text = subprocess.Popen('tac logs/temp_hum.txt | grep -m1 "E2"', shell=True,
-                                stdout=subprocess.PIPE).stdout.read()
+        p1 = subprocess.Popen(['tac', filename], stdout=subprocess.PIPE)
     elif sys.platform == 'darwin':
-        text = subprocess.Popen('tail -r logs/temp_hum.txt | grep -m1 "E2"', shell=True,
-                                stdout=subprocess.PIPE).stdout.read()
+        p1 = subprocess.Popen(['tail', '-r', filename], stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['grep', '-m1', searchterm], stdin=p1.stdout, stdout=subprocess.PIPE)
+    text = p2.communicate()[0]
     textList = text.split()
     # TODO: make some assertions about integrity of text in that line
     if time.time() - int(textList[2]) < 5*60:
         temp = float(textList[5])
         hum = float(textList[6])
-        # TODO: deal with lack of data, i.e. set up email alerts
     else:
         sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
     return temp
@@ -130,21 +131,21 @@ with ActuatorsContextManager() as actuators:
                 if controlType == 'heating':
                     if temperature < thresh - hysteresis:
                         #actuators.heatOn()
-                        log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+                        log.write('Heat on: %.1f F in %s < %i F setpoint.' % (temperature, room, thresh))
                     elif temperature > thresh + hysteresis:
                         #actuators.heatOff()
-                        log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+                        log.write('Heat off: %.1f F in %s > %i F.' % (temperature, room, thresh))
                     else:
-                        log.write('No heating change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
+                        log.write('No heating change: %.1f F in %s is near %i F setpoint.' % (temperature, room, thresh))
                 elif controlType == 'cooling':
                     if temperature > thresh + hysteresis:
                         actuators.coolOn()
-                        log.write('Cooling on: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
+                        log.write('Cooling on: %.1f F in %s > %i F setpoint.' % (temperature, room, thresh))
                     elif temperature < thresh - hysteresis:
                         actuators.coolOff()
-                        log.write('Cooling off: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
+                        log.write('Cooling off: %.1f F in %s < %i F setpoint.' % (temperature, room, thresh))
                     else:
-                        log.write('No cooling change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
+                        log.write('No cooling change: %.1f F in %s is near %i F setpoint.' % (temperature, room, thresh))
             else:
                 log.write(time.asctime() + ": thermostat.py sensor read failed.")
             if actuators.heatOnBool():
