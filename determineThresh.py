@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-#reads thermostatProgram.txt to output a threshold temperature and
+#reads appropriate .json file (in variable configFile) to output a threshold temperature and
 #room to read temp from, based on current day/time
 import datetime
 import requests
@@ -19,11 +19,7 @@ def makeJSONDict(jsonOutput):
             continue
     return holidays
 
-def determineThreshRoom(controlType):
-    if controlType == 'cooling':
-        programFile = "./fanProgram.txt"
-    elif controlType == 'heating':
-        programFile = "./thermostatProgram.txt"
+def determineThreshRoom(configFile):
 
     # Determine time and day of week
     currentDateTime = datetime.datetime.now()
@@ -36,6 +32,10 @@ def determineThreshRoom(controlType):
         dayType = 'week'
 
     # Load thermostat program into nested dict
+    with open(configFile) as tweetfile:
+        programDict = json.load(tweetfile)
+
+"""
     programDict = {}
     with open(programFile) as f:
         for line in f:
@@ -49,7 +49,7 @@ def determineThreshRoom(controlType):
                 programDict[lineArray[0]] = {}
                 programDict[lineArray[0]][lineArray[1]] = [lineArray[2]]
                 programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
-
+"""
 
     # If it's a chag, revert to weekend day type
 
