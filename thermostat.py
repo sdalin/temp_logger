@@ -1,5 +1,5 @@
 #!/usr/local/bin/python
-from determineThresh import determineThreshRoom
+from determineThresh import readThreshFromConfigFile
 from functions import *
 
 try:
@@ -131,7 +131,7 @@ with ActuatorsContextManager() as actuators:
         try:
             startTime = time.time()
             # temperature setting in F and room to read temp from
-            [thresh, room] = determineThreshRoom(configFile)
+            [thresh, room] = readThreshFromConfigFile(configFile)
             temperature = readRoom(room)
             if temperature is not None:
                 if controlType == 'heating':

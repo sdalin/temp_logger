@@ -19,7 +19,7 @@ def makeJSONDict(jsonOutput):
             continue
     return holidays
 
-def determineThreshRoom(configFile):
+def determineDayTypeAndTime():
 
     # Determine time and day of week
     currentDateTime = datetime.datetime.now()
@@ -30,26 +30,6 @@ def determineThreshRoom(configFile):
         dayType = 'end'
     else:
         dayType = 'week'
-
-    # Load thermostat program into nested dict
-    with open(configFile) as tweetfile:
-        programDict = json.load(tweetfile)
-
-"""
-    programDict = {}
-    with open(programFile) as f:
-        for line in f:
-            lineArray = line.split()
-            if line[0] == '#':
-                continue
-            if lineArray[0] in programDict:
-                programDict[lineArray[0]][lineArray[1]] = [lineArray[2]]
-                programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
-            else:
-                programDict[lineArray[0]] = {}
-                programDict[lineArray[0]][lineArray[1]] = [lineArray[2]]
-                programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
-"""
 
     # If it's a chag, revert to weekend day type
 
@@ -79,17 +59,18 @@ def determineThreshRoom(configFile):
             dataCurrent = True
 
     #If there wasn't candle lighting in the past week in the stored data, we need new data
+
     if dataCurrent == False:
         try:
             output = requests.get(
-                'http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on')
+                'http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod    =off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on'    )
         except requests.exceptions.ConnectionError:
-            # If the API request fails once its generally OK to use yesterdays' data.
+            # If the API request fails once its generally OK to use yesterdays'     data.
             pass
 
         # Write new data and load into variable to create dict
         f = codecs.open('chagDays', 'w', 'utf-8')
-        f.write(output)
+        f.write(output.text)
         f.close
 
         dictionary = json.loads(output.text)
@@ -103,8 +84,17 @@ def determineThreshRoom(configFile):
     if yesterday in holidayDates:
         dayType = 'end'
 
+    return currentTime, dayType
 
 
+def readThreshFromConfigFile(configFile):
+
+    #Determine if weekend or weekday and current time
+    [currentTime,dayType] = determineDayTypeAndTime()
+
+    # Load thermostat program into nested dict
+    with open(configFile) as json_file:
+        programDict = json.load(json_file)
 
     # use dict to access day/time to get thresh and room
     dayTimes = programDict[dayType].keys()
@@ -116,8 +106,12 @@ def determineThreshRoom(configFile):
     timeType = list[-1]
 
     # access the threshold temp and room to read from
+    #PROBLEM HERE:  HOW TO SPECIFY WHICH THING TO READ, ie 2 keys, hum and temp, how to say read temp?  keys are not strings...
     thresh = programDict[dayType][timeType][0]
     readRoom = programDict[dayType][timeType][1]
 
     # return threshold temp and room to read from
     return float(thresh), readRoom
+
+[thresh, room] = readThreshFromConfigFile('WinterConfig.json')
+print thresh, room
