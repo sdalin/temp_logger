@@ -1,0 +1,53 @@
+{
+"week":
+    {
+    "00:00":
+        {
+        "bedTemp": 61
+        "bedHum": 70
+        }
+    "07:00":
+        {
+        "bedTemp": 68
+        }
+    "10:30":
+        {
+        "diningTemp": 61
+        }
+    "17:00":
+        {
+        "diningTemp": 68
+        }
+    "23:30":
+        {
+        "bedTemp": 61
+        "bedHum": 70
+        }
+    }
+"end":
+    {
+    "00:00":
+        {
+        "bedTemp": 61
+        "bedHum": 70
+        }
+    "08:30":
+        {
+        "diningTemp": 68
+        }
+    "14:00":
+        {
+        "bedTemp": 66
+        "bedHum": 70
+        }
+    "20:00":
+        {
+        "diningTemp": 68
+        }
+    "23:30":
+        {
+        "bedTemp": 61
+        "bedHum": 70
+        }
+    }
+}
