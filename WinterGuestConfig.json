@@ -3,57 +3,57 @@
     {
     "00:00":
         {
-        "bedTemp": 61
-        "bedHum": 70
+        "bedTemp": 61,
+        "bedHum": 70,
         "livingTemp": 65
-        }
+        },
     "07:00":
         {
-        "bedTemp": 68
+        "bedTemp": 68,
         "livingTemp": 68
-        }
+        },
     "10:30":
         {
         "diningTemp": 61
-        }
+        },
     "17:00":
         {
         "diningTemp": 68
-        }
+        },
     "23:30":
         {
-        "bedTemp": 61
-        "bedHum": 70
+        "bedTemp": 61,
+        "bedHum": 70,
         "livingTemp": 65
         }
-    }
+    },
 "end":
     {
     "00:00":
         {
-        "bedTemp": 61
-        "bedHum": 70
+        "bedTemp": 61,
+        "bedHum": 70,
         "livingTemp": 65
-        }
+        },
     "08:30":
         {
-        "diningTemp": 68
+        "diningTemp": 68,
         "livingTemp": 68
-        }
+        },
     "14:00":
         {
-        "bedTemp": 66
-        "bedHum": 70
+        "bedTemp": 66,
+        "bedHum": 70,
         "livingTemp": 65
-        }
+        },
     "20:00":
         {
         "diningTemp": 68
-        }
+        },
     "23:30":
         {
-        "bedTemp": 61
-        "bedHum": 70
+        "bedTemp": 61,
+        "bedHum": 70,
         "livingTemp": 65
         }
     }
