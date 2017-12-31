@@ -1,11 +1,12 @@
 #!/usr/local/bin/python
 
-#reads thermostatProgram.txt to output a threshold temperature and
-#room to read temp from, based on current day/time
+# reads thermostatProgram.txt to output a threshold temperature and
+# room to read temp from, based on current day/time
 import datetime
 import requests
 import json
 import codecs
+
 
 def makeJSONDict(jsonOutput):
     # make dict of this year's holiday dates and candle lighting times
@@ -18,6 +19,7 @@ def makeJSONDict(jsonOutput):
         else:
             continue
     return holidays
+
 
 def determineThreshRoom(controlType):
     if controlType == 'cooling':
@@ -53,14 +55,14 @@ def determineThreshRoom(controlType):
 
     # If it's a chag, revert to weekend day type
 
-    #Determine Date
+    # Determine Date
     Today = datetime.datetime.today()
     yesterday = datetime.datetime.today() - datetime.timedelta(1)
     prevDay = yesterday.strftime("%Y-%m-%d")
     todayYMD = Today.strftime("%Y-%m-%d")
     yesterday = prevDay
 
-    #Read the chag days JSON already stored
+    # Read the chag days JSON already stored
     f = codecs.open('chagDays','r', 'utf-8')
     output = f.read()
     dictionary = json.loads(output)
@@ -78,7 +80,7 @@ def determineThreshRoom(controlType):
         if testDayYMD in holidayDates:
             dataCurrent = True
 
-    #If there wasn't candle lighting in the past week in the stored data, we need new data
+    # If there wasn't candle lighting in the past week in the stored data, we need new data
     if dataCurrent == False:
         try:
             output = requests.get(
@@ -90,13 +92,12 @@ def determineThreshRoom(controlType):
         # Write new data and load into variable to create dict
         f = codecs.open('chagDays', 'w', 'utf-8')
         f.write(output)
-        f.close
+        f.close()
 
         dictionary = json.loads(output.text)
 
         # make dict of the stored year's holiday dates and candle lighting times
         holidays = makeJSONDict(dictionary)
-
 
     # check if there was candle lighting yesterday
     holidayDates = holidays.keys()
@@ -111,9 +112,9 @@ def determineThreshRoom(controlType):
 
     # list all time keys less than the current time, sort then select biggest
     # to find most recent time
-    list = [x for x in dayTimes if x < currentTime]
-    list.sort()
-    timeType = list[-1]
+    lst = [x for x in dayTimes if x < currentTime]
+    lst.sort()
+    timeType = lst[-1]
 
     # access the threshold temp and room to read from
     thresh = programDict[dayType][timeType][0]
