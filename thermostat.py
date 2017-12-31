@@ -116,7 +116,7 @@ class Actuators:
         return GPIO.input(self.heatReadPin)
 
 #configFile = 'cooling'
-configFile = 'WinterConfig.json'
+configFile = './thermostatProgram.txt'
 
 if configFile.find('Winter') > -1:
     controlType = 'heating'
