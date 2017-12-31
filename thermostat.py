@@ -50,9 +50,10 @@ def readBed():
     if time.time() - int(textList[2]) < 5*60:
         temp = float(textList[5])
         hum = float(textList[6])
+        return temp, hum
     else:
         sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
-    return temp
+        return None, None
 
 
 def readRoom(room='dining'):
@@ -74,6 +75,239 @@ class ActuatorsContextManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         GPIO.cleanup()
+
+
+# list of data sources:  bedroom temp, bedroom hum, living room temp, dining room temp, dining room hum
+# list of actuators:  boiler, bedroom fan/ac, bedroom humidifier, living room space heater
+# list of setpoints:  dining room temp, bedroom temp, bedroom hum, living room temp
+
+# DRT links boiler to DRT, BRT links boiler to BRT, BRH links BRH to BRH, LRT links LRSH and boiler to LRT
+
+
+
+
+
+
+
+
+
+
+
+
+######## Inputs/Process Values ########
+
+class BRTemperature:
+    def __init__(self):
+        self.room = 'bed'
+        self.unit = 'F'
+        self.type = 'temperature'
+
+    def read(self):
+        temp, hum = readBed()
+        return temp
+
+
+class BRHumidity:
+    def __init__(self):
+        self.room = 'bed'
+        self.unit = '%'
+        self.type = 'humidity'
+
+    def read(self):
+        temp, hum = readBed()
+        return hum
+
+
+class LRTemperature:
+    def __init__(self):
+        self.room = 'living'
+        self.unit = 'F'
+        self.type = 'temperature'
+        self.sensor = DS18B20()
+
+    def read(self):
+        return self.sensor.read(self.unit)
+
+class DRTemperature:
+    def __init__(self):
+        self.room = 'dining'
+        self.unit = 'F'
+        self.type = 'temperature'
+        self.sensor = DHT()
+
+    def read(self):
+        return self.sensor.read(self.unit)
+
+
+
+
+######## Actuators #########
+
+class Boiler:
+    def __init__(self):
+        self.name = 'boiler'
+        self.Name = 'Boiler'
+        self.readPin = 24
+        self.onPin = 23
+
+    def turnOn(self):
+        # turns heat on
+        GPIO.output(self.onPin, True)
+
+    def turnOff(self):
+        # turns heat off
+        GPIO.output(self.onPin, False)
+
+    def isOn(self):
+        # checks if heat is on
+        return GPIO.input(self.readPin)
+
+
+class WoodsOutlet:
+    # functions through Woods 13569 remote outlet switch
+    def __init__(self, onPin, offPin):
+        self.onPin = onPin
+        self.offPin = offPin
+        GPIO.setup(self.onPin, GPIO.OUT, initial=False)
+        GPIO.setup(self.offPin, GPIO.OUT, initial=False)
+
+    def turnOn(self):
+        GPIO.output(self.onPin, False)
+        GPIO.output(self.offPin, False)
+        GPIO.output(self.onPin, True)
+        time.sleep(1)
+        GPIO.output(self.onPin, False)
+
+    def turnOff(self):
+        GPIO.output(self.offPin, False)
+        GPIO.output(self.onPin, False)
+        GPIO.output(self.offPin, True)
+        time.sleep(1)
+        GPIO.output(self.offPin, False)
+
+
+class BRCooler(WoodsOutlet):
+    # functions through Woods 13569 remote outlet switch
+    def __init__(self):
+        room = 'br'
+        thing = 'Cooler'
+        self.name = room + thing
+        self.Name = room.upper() + thing
+        onPin = 5
+        offPin = 6
+        WoodsOutlet.__init__(self, onPin, offPin)
+
+
+class BRHumidifier(WoodsOutlet):
+    # functions through Woods 13569 remote outlet switch
+    def __init__(self):
+        room = 'br'
+        thing = 'Humidifier'
+        self.name = room + thing
+        self.Name = room.upper() + thing
+        onPin =
+        offPin =
+        WoodsOutlet.__init__(self, onPin, offPin)
+
+
+class LRHeater(WoodsOutlet):
+    # functions through Woods 13569 remote outlet switch
+    def __init__(self):
+        room = 'lr'
+        thing = 'Heater'
+        self.name = room + thing
+        self.Name = room.upper() + thing
+        onPin =
+        offPin =
+        WoodsOutlet.__init__(self, onPin, offPin)
+
+
+
+
+######## Controllers #########
+
+def increaseController(setpoint, inputObj, actuator, hysteresis=1):
+    # setpoint should be desired value
+    # input should have a read() method that returns a value of the same type as setpoint
+    # actuator should be object not class
+    # hysteresis should be amount of acceptable variation from setpoint
+    sensorValue = inputObj.read()
+    textList = [actuator.Name, sensorValue, inputObj.unit, inputObj.room, setpoint, inputObj.type]
+    failed = False
+    if sensorValue is not None:
+        if sensorValue < setpoint - hysteresis:
+            actuator.turnOn()
+            log.write('{0} on: {1:.1f}{2} in {3} room < setpoint of {4}{2}'.format(*textList))
+        elif sensorValue > setpoint + hysteresis:
+            actuator.turnOff()
+            log.write('{0} off: {1:.1f}{2} in {3} room > setpoint of {4}{2}'.format(*textList))
+        else:
+            log.write('No {0} change: {1:.1f}{2} in {3} room is near setpoint of {4}{2}'.format(*textList))
+    else:
+        log.write(time.asctime() + ": {3} room {5} read failed.".format(*textList))
+        failed = True
+    try:
+        if actuator.isOn():
+            log.write('Magic 8 ball says heater is probably on.')
+        else:
+            log.write('Magic 8 ball says heater is probably off.')
+    except AttributeError:      # this actuator has no isOn()
+        pass
+    if failed:
+        return False
+    else:
+        return True
+
+
+
+######## Main loop #########
+
+implemented = False
+nFailures = 0
+log = Logger('logs/thermostat.txt')
+
+boiler = Boiler()
+brTemperature = BRTemperature()
+brHumidity = BRHumidity()
+brHumidifier = BRHumidifier()
+drTemperature = DRTemperature()
+lrTemperature = LRTemperature()
+lrHeater = LRHeater()
+# controllers[room][type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
+controls = {'bed': {'temp': {'v': brTemperature, 'a': boiler},
+                    'hum': {'v': brHumidity, 'a': brHumidifier}},
+           'dining': {'temp': {'v': drTemperature, 'a': boiler}},
+           'living': {'temp': {'v': lrTemperature, 'a': lrHeater}}}
+while implemented and __name__ == "__main__":
+    try:
+        startTime = time.time()
+        [thresh, room] = determineThreshRoom('heating')
+        success = increaseController(thresh, controls[room]['temp']['v'], controls[room]['temp']['a'])
+
+
+
+        if not success:
+            nFailures += 1
+            if nFailures >= 3:
+                text = 'Failure in control of {0} room'.format(room)
+                sendEmail('Thermostat Shutdown', text)
+                raise Exception(text)
+            else:
+                pass
+
+        endTime = time.time()
+        elapsedTime = endTime - startTime
+        print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
+        time.sleep(max(1 * 60 - elapsedTime, 0))
+    except Exception:
+        nFailures += 1
+        text = 'Failure ' + str(nFailures) + '\n' + traceback.format_exc()
+        log.write(text)
+        if nFailures >= 3:
+            sendEmail('Thermostat Shutdown', text)
+            raise
+        else:
+            sendEmail('Thermostat Error', text)
 
 
 class Actuators:
