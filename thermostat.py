@@ -1,5 +1,5 @@
 #!/usr/local/bin/python
-from determineThresh import readThreshFromConfigFile
+from determineThresh import determineThreshRoom, readThreshFromConfigFile
 from functions import *
 
 try:
