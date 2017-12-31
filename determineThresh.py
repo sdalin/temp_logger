@@ -21,7 +21,6 @@ def makeJSONDict(jsonOutput):
     return holidays
 
 def determineDayTypeAndTime():
-
     # Determine time and day of week
     currentDateTime = datetime.datetime.now()
     currentTime = currentDateTime.strftime("%H:%M:%S")
@@ -41,23 +40,26 @@ def determineDayTypeAndTime():
     todayYMD = Today.strftime("%Y-%m-%d")
     yesterday = prevDay
 
-    # Read the chag days JSON already stored
-    f = codecs.open('chagDays','r', 'utf-8')
-    output = f.read()
-    dictionary = json.loads(output)
-    f.close()
+    try:
+        # Read the chag days JSON already stored
+        f = codecs.open('chagDays.json','r', 'utf-8')
+        output = f.read()
+        dictionary = json.loads(output)
+        f.close()
 
-    # make dict of the stored year's holiday dates and candle lighting times
-    holidays = makeJSONDict(dictionary)
+        # make dict of the stored year's holiday dates and candle lighting times
+        holidays = makeJSONDict(dictionary)
 
-    # check if there was candle lighting in the past week in the stored data
-    holidayDates = holidays.keys()
-    dataCurrent = False
-    for day in range(7):
-        testDay = datetime.datetime.today() - datetime.timedelta(day)
-        testDayYMD = testDay.strftime("%Y-%m-%d")
-        if testDayYMD in holidayDates:
-            dataCurrent = True
+        # check if there was candle lighting in the past week in the stored data
+        holidayDates = holidays.keys()
+        dataCurrent = False
+        for day in range(7):
+            testDay = datetime.datetime.today() - datetime.timedelta(day)
+            testDayYMD = testDay.strftime("%Y-%m-%d")
+            if testDayYMD in holidayDates:
+                dataCurrent = True
+    except (IOError, ValueError):
+        dataCurrent = False
 
     # If there wasn't candle lighting in the past week in the stored data, we need new data
     if dataCurrent == False:
@@ -69,8 +71,8 @@ def determineDayTypeAndTime():
             pass
 
         # Write new data and load into variable to create dict
-        f = codecs.open('chagDays', 'w', 'utf-8')
-        f.write(output)
+        f = codecs.open('chagDays.json', 'w', 'utf-8')
+        f.write(json.dumps(json.loads(output.text), indent=2))
         f.close()
 
         dictionary = json.loads(output.text)
@@ -87,8 +89,7 @@ def determineDayTypeAndTime():
 
 
 def readThreshFromConfigFile(configFile):
-
-    #Determine if weekend or weekday and current time
+    # Determine if weekend or weekday and current time
     [currentTime,dayType] = determineDayTypeAndTime()
 
     # Load thermostat program into nested dict
@@ -104,13 +105,46 @@ def readThreshFromConfigFile(configFile):
     lst.sort()
     timeType = lst[-1]
 
+    # return threshold temp and room to read from
+    return programDict[dayType][timeType]
+
+
+def determineThreshRoom(configFile):
+    # if controlType == 'cooling':
+    #     programFile = "./fanProgram.txt"
+    # elif controlType == 'heating':
+    #     programFile = "./thermostatProgram.txt"
+
+    # Determine if weekend or weekday and current time
+    [currentTime, dayType] = determineDayTypeAndTime()
+
+    # Load thermostat program into nested dict
+    programDict = {}
+    with open(configFile) as f:
+        for line in f:
+            lineArray = line.split()
+            if line[0] == '#':
+                continue
+            if lineArray[0] in programDict:
+                programDict[lineArray[0]][lineArray[1]] = [lineArray[2]]
+                programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
+            else:
+                programDict[lineArray[0]] = {}
+                programDict[lineArray[0]][lineArray[1]] = [lineArray[2]]
+                programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
+
+    # use dict to access day/time to get thresh and room
+    dayTimes = programDict[dayType].keys()
+
+    # list all time keys less than the current time, sort then select biggest
+    # to find most recent time
+    lst = [x for x in dayTimes if x < currentTime]
+    lst.sort()
+    timeType = lst[-1]
+
     # access the threshold temp and room to read from
-    #PROBLEM HERE:  HOW TO SPECIFY WHICH THING TO READ, ie 2 keys, hum and temp, how to say read temp?  keys are not strings...
     thresh = programDict[dayType][timeType][0]
     readRoom = programDict[dayType][timeType][1]
 
     # return threshold temp and room to read from
     return float(thresh), readRoom
-
-[thresh, room] = readThreshFromConfigFile('WinterConfig.json')
-print thresh, room
