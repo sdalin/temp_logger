@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 
-# reads thermostatProgram.txt to output a threshold temperature and
-# room to read temp from, based on current day/time
+#reads appropriate .json file (in variable configFile) to output a threshold temperature and
+#room to read temp from, based on current day/time
 import datetime
 import requests
 import json
@@ -20,12 +20,7 @@ def makeJSONDict(jsonOutput):
             continue
     return holidays
 
-
-def determineThreshRoom(controlType):
-    if controlType == 'cooling':
-        programFile = "./fanProgram.txt"
-    elif controlType == 'heating':
-        programFile = "./thermostatProgram.txt"
+def determineDayTypeAndTime():
 
     # Determine time and day of week
     currentDateTime = datetime.datetime.now()
@@ -36,22 +31,6 @@ def determineThreshRoom(controlType):
         dayType = 'end'
     else:
         dayType = 'week'
-
-    # Load thermostat program into nested dict
-    programDict = {}
-    with open(programFile) as f:
-        for line in f:
-            lineArray = line.split()
-            if line[0] == '#':
-                continue
-            if lineArray[0] in programDict:
-                programDict[lineArray[0]][lineArray[1]] = [lineArray[2]]
-                programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
-            else:
-                programDict[lineArray[0]] = {}
-                programDict[lineArray[0]][lineArray[1]] = [lineArray[2]]
-                programDict[lineArray[0]][lineArray[1]].append(lineArray[3])
-
 
     # If it's a chag, revert to weekend day type
 
@@ -104,8 +83,17 @@ def determineThreshRoom(controlType):
     if yesterday in holidayDates:
         dayType = 'end'
 
+    return currentTime, dayType
 
 
+def readThreshFromConfigFile(configFile):
+
+    #Determine if weekend or weekday and current time
+    [currentTime,dayType] = determineDayTypeAndTime()
+
+    # Load thermostat program into nested dict
+    with open(configFile) as json_file:
+        programDict = json.load(json_file)
 
     # use dict to access day/time to get thresh and room
     dayTimes = programDict[dayType].keys()
@@ -117,8 +105,12 @@ def determineThreshRoom(controlType):
     timeType = lst[-1]
 
     # access the threshold temp and room to read from
+    #PROBLEM HERE:  HOW TO SPECIFY WHICH THING TO READ, ie 2 keys, hum and temp, how to say read temp?  keys are not strings...
     thresh = programDict[dayType][timeType][0]
     readRoom = programDict[dayType][timeType][1]
 
     # return threshold temp and room to read from
     return float(thresh), readRoom
+
+[thresh, room] = readThreshFromConfigFile('WinterConfig.json')
+print thresh, room

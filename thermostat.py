@@ -1,5 +1,5 @@
 #!/usr/local/bin/python
-from determineThresh import determineThreshRoom
+from determineThresh import readThreshFromConfigFile
 from functions import *
 
 try:
@@ -115,8 +115,13 @@ class Actuators:
         # checks if heat is on
         return GPIO.input(self.heatReadPin)
 
-#controlType = 'cooling'
-controlType = 'heating'
+#configFile = 'cooling'
+configFile = 'WinterConfig.json'
+
+if configFile.find('Winter') > -1:
+    controlType = 'heating'
+elif configFile.find('Summer') > -1:
+    controlType = 'cooling'
 
 log = Logger('logs/thermostat.txt')
 hysteresis = 1      # amount that the temp can be off from set point before triggering actuator
@@ -126,7 +131,7 @@ with ActuatorsContextManager() as actuators:
         try:
             startTime = time.time()
             # temperature setting in F and room to read temp from
-            [thresh, room] = determineThreshRoom(controlType)
+            [thresh, room] = readThreshFromConfigFile(configFile)
             temperature = readRoom(room)
             if temperature is not None:
                 if controlType == 'heating':
