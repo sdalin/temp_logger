@@ -258,6 +258,38 @@ def increaseController(setpoint, inputObj, actuator, hysteresis=1):
     else:
         return True
 
+def decreaseController(setpoint, inputObj, actuator, hysteresis=1):
+    # setpoint should be desired value
+    # input should have a read() method that returns a value of the same type as setpoint
+    # actuator should be object not class
+    # hysteresis should be amount of acceptable variation from setpoint
+    sensorValue = inputObj.read()
+    textList = [actuator.Name, sensorValue, inputObj.unit, inputObj.room, setpoint, inputObj.type]
+    failed = False
+    if sensorValue is not None:
+        if sensorValue > setpoint + hysteresis:
+            actuator.turnOn()
+            log.write('{0} on: {1:.1f}{2} in {3} room > setpoint of {4}{2}'.format(*textList))
+        elif sensorValue < setpoint - hysteresis:
+            actuator.turnOff()
+            log.write('{0} off: {1:.1f}{2} in {3} room < setpoint of {4}{2}'.format(*textList))
+        else:
+            log.write('No {0} change: {1:.1f}{2} in {3} room is near setpoint of {4}{2}'.format(*textList))
+    else:
+        log.write(time.asctime() + ": {3} room {5} read failed.".format(*textList))
+        failed = True
+    try:
+        # so far only heater has way to check if it's on or off
+        if actuator.isOn():
+            log.write('Magic 8 ball says heater is probably on.')
+        else:
+            log.write('Magic 8 ball says heater is probably off.')
+    except AttributeError:  # this actuator has no isOn()
+        pass
+    if failed:
+        return False
+    else:
+        return True
 
 
 ######## Main loop #########
@@ -266,6 +298,8 @@ implemented = False
 nFailures = 0
 log = Logger('logs/thermostat.txt')
 
+configFile = 'WinterConfig.json'
+
 boiler = Boiler()
 brTemperature = BRTemperature()
 brHumidity = BRHumidity()
@@ -273,27 +307,30 @@ brHumidifier = BRHumidifier()
 drTemperature = DRTemperature()
 lrTemperature = LRTemperature()
 lrHeater = LRHeater()
-# controllers[room][type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
-controls = {'bed': {'temp': {'v': brTemperature, 'a': boiler},
-                    'hum': {'v': brHumidity, 'a': brHumidifier}},
-           'dining': {'temp': {'v': drTemperature, 'a': boiler}},
-           'living': {'temp': {'v': lrTemperature, 'a': lrHeater}}}
+# controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
+# bedTemp, bedHum, livingTemp, diningTemp
+controls = {'bedTemp': {'v': brTemperature, 'a': boiler},
+            'bedHum': {'v': brHumidity, 'a': brHumidifier},
+            'diningTemp': {'v': drTemperature, 'a': boiler},
+            'livingTemp': {'v': lrTemperature, 'a': lrHeater}}
 while implemented and __name__ == "__main__":
     try:
         startTime = time.time()
-        [thresh, room] = determineThreshRoom('heating')
-        success = increaseController(thresh, controls[room]['temp']['v'], controls[room]['temp']['a'])
-
-
-
-        if not success:
-            nFailures += 1
-            if nFailures >= 3:
-                text = 'Failure in control of {0} room'.format(room)
-                sendEmail('Thermostat Shutdown', text)
-                raise Exception(text)
+        optimizees = readThreshFromConfigFile(configFile)
+        for optimizee in optimizees:
+            if configFile.find('Summer') > -1 and optimizee[-4:] == 'Temp':
+                success = decreaseController(optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
             else:
-                pass
+                success = increaseController(optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
+
+            if not success:
+                nFailures += 1
+                if nFailures >= 3:
+                    text = 'Failure in control of {0} room'.format(optimizee)
+                    sendEmail('Thermostat Shutdown', text)
+                    raise Exception(text)
+                else:
+                    pass
 
         endTime = time.time()
         elapsedTime = endTime - startTime
