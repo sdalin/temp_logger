@@ -117,12 +117,12 @@ class Actuators:
         # checks if heat is on
         return GPIO.input(self.heatReadPin)
 
-#configFile = 'cooling'
-configFile = './thermostatProgram.txt'
+#configFile = './fanProgram.txt'
+configFile = './heatProgram.txt'
 
-if configFile.find('Winter') > -1:
+if configFile.find('Winter') > -1 or configFile.find('heat') > -1:
     controlType = 'heating'
-elif configFile.find('Summer') > -1:
+elif configFile.find('Summer') > -1 or configFile.find('fan') > -1:
     controlType = 'cooling'
 
 log = Logger('logs/thermostat.txt')
@@ -133,7 +133,7 @@ with ActuatorsContextManager() as actuators:
         try:
             startTime = time.time()
             # temperature setting in F and room to read temp from
-            [thresh, room] = readThreshFromConfigFile(configFile)
+            [thresh, room] = determineThreshRoom(configFile)
             temperature = readRoom(room)
             if temperature is not None:
                 if controlType == 'heating':
