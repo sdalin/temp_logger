@@ -6,6 +6,7 @@ import time
 
 DEBUG = True
 
+dir = 'mountpoint/logs/'
 
 def importData(file, column_names=[]):
     if DEBUG:
@@ -21,7 +22,7 @@ def importData(file, column_names=[]):
 
 
 column_names = ["Date","Time","UnixTime","NodeID","MessageIndex","Temperature","Humidity","Temperature2","Humidity2"]
-radio = pd.read_table('logs/temp_hum.txt', sep='[ \t]', header=None, names=column_names[2:7], usecols=range(2,7), engine='python')
+radio = pd.read_table(dir + 'temp_hum.txt', sep='[ \t]', header=None, names=column_names[2:7], usecols=range(2,7), engine='python')
 radio = radio.dropna()
 #radio.Temperature = radio.Temperature.apply(lambda x: float(x) if str(x).replace('.', '').isdigit() else np.nan)
 radio.Temperature = pd.to_numeric(radio.Temperature, errors='coerce')
@@ -32,10 +33,10 @@ basement = radio[radio.NodeID == 'E1']
 
 
 column_names2 = ["Date","Time","UnixTime","Temperature","Humidity"]
-diningroom = importData('logs/inside_temp.txt', column_names2)
+diningroom = importData(dir + 'inside_temp.txt', column_names2)
 
 
-outside = importData('logs/outside_temp.txt', column_names2)
+outside = importData(dir + 'outside_temp.txt', column_names2)
 
 
 varList = [bedroom, diningroom, outside, basement]
