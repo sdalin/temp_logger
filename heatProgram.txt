@@ -1,0 +1,11 @@
+#day type (week or end)    time    set temp (F)    set room (dining or bed)
+week    00:00   61  bed
+week    07:00   68  bed
+week    10:30   61  dining
+week    17:00    68  dining
+week    23:30   61  bed
+end 00:00   61  bed
+end 08:30   68  dining
+end 14:00    66  bed
+end 20:00    68  dining
+end 23:30   61  bed

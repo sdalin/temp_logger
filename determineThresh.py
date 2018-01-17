@@ -23,7 +23,7 @@ def determineThreshRoom(controlType):
     if controlType == 'cooling':
         programFile = "./fanProgram.txt"
     elif controlType == 'heating':
-        programFile = "./thermostatProgram.txt"
+        programFile = "./heatProgram.txt"
 
     # Determine time and day of week
     currentDateTime = datetime.datetime.now()
