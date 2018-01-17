@@ -9,6 +9,7 @@ except RuntimeError:
           "You can achieve this by using 'sudo' to run your script")
 import time
 from sensors import *
+import rfsniffer
 from logger import Logger
 
 import sys
@@ -205,8 +206,8 @@ class BRHumidifier(WoodsOutlet):
         thing = 'Humidifier'
         self.name = room + thing
         self.Name = room.upper() + thing
-        onPin =
-        offPin =
+        onPin = np.nan
+        offPin = np.nan
         WoodsOutlet.__init__(self, onPin, offPin)
 
 
@@ -217,8 +218,8 @@ class LRHeater(WoodsOutlet):
         thing = 'Heater'
         self.name = room + thing
         self.Name = room.upper() + thing
-        onPin =
-        offPin =
+        onPin = np.nan
+        offPin = np.nan
         WoodsOutlet.__init__(self, onPin, offPin)
 
 

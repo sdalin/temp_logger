@@ -18,3 +18,6 @@
 	url = https://github.com/arduino/Arduino.git
 	shallow = true
 	branch = refs/tags/1.5.6
+[submodule "libraries/rpi-rfsniffer"]
+	path = libraries/rpi-rfsniffer
+	url = git@github.com:jderehag/rpi-rfsniffer.git
