@@ -69,9 +69,11 @@ class ActuatorsContextManager:
 
     def __enter__(self):
         GPIO.setmode(GPIO.BCM)
-        return Actuators()
+        self.a = Actuators()
+        return self.a
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.a.heatOff()
         GPIO.cleanup()
 
 
@@ -130,10 +132,10 @@ with ActuatorsContextManager() as actuators:
             if temperature is not None:
                 if controlType == 'heating':
                     if temperature < thresh - hysteresis:
-                        #actuators.heatOn()
+                        actuators.heatOn()
                         log.write('Heat on: %.1f degrees in %s is below %i degree threshold.' % (temperature, room, thresh))
                     elif temperature > thresh + hysteresis:
-                        #actuators.heatOff()
+                        actuators.heatOff()
                         log.write('Heat off: %.1f degrees in %s is above %i degree threshold.' % (temperature, room, thresh))
                     else:
                         log.write('No heating change: %.1f degrees in %s is near %i degree threshold.' % (temperature, room, thresh))
@@ -162,6 +164,7 @@ with ActuatorsContextManager() as actuators:
                 sendEmail('Thermostat Shutdown', 'No recent temperature data coming in over radio. ')
                 raise
             else:
+                time.sleep(5*60)
                 pass
         except Exception:
             nFailures += 1
@@ -172,3 +175,4 @@ with ActuatorsContextManager() as actuators:
                 raise
             else:
                 sendEmail('Thermostat Error', text)
+                time.sleep(5*60)
