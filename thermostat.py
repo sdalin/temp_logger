@@ -166,6 +166,7 @@ class Boiler:
 
 class WoodsOutlet:
     # functions through Woods 13569 remote outlet switch
+    # by switching a relay attached to the remote itself.
     def __init__(self, onPin, offPin):
         self.onPin = onPin
         self.offPin = offPin
@@ -187,40 +188,52 @@ class WoodsOutlet:
         GPIO.output(self.offPin, False)
 
 
-class BRCooler(WoodsOutlet):
+
+class RFOutlet:
+    # uses rfsniffer to play codes captured with 315 or 433 MHz radios attached to RPi
+    def __init__(self, outletID):
+        self.txPin = 17
+        self.buttondb = './buttons.db'
+        self.outletID = outletID
+
+    def turnOn(self):
+        rfsniffer.play(self.txPin, self.outletID + 'on', self.buttondb)
+
+    def turnOff(self):
+        rfsniffer.play(self.txPin, self.outletID + 'off', self.buttondb)
+
+
+class BRCooler(RFOutlet):
     # functions through Woods 13569 remote outlet switch
     def __init__(self):
         room = 'br'
         thing = 'Cooler'
         self.name = room + thing
         self.Name = room.upper() + thing
-        onPin = 5
-        offPin = 6
-        WoodsOutlet.__init__(self, onPin, offPin)
+        self.outletID = 'F1'    # i.e. CH F, channel 1
+        RFOutlet.__init__(self, self.outletID)
 
 
-class BRHumidifier(WoodsOutlet):
+class BRHumidifier(RFOutlet):
     # functions through Woods 13569 remote outlet switch
     def __init__(self):
         room = 'br'
         thing = 'Humidifier'
         self.name = room + thing
         self.Name = room.upper() + thing
-        onPin = np.nan
-        offPin = np.nan
-        WoodsOutlet.__init__(self, onPin, offPin)
+        self.outletID = 'F1'    # i.e. CH F, channel 1
+        RFOutlet.__init__(self, self.outletID)
 
 
-class LRHeater(WoodsOutlet):
+class LRHeater(RFOutlet):
     # functions through Woods 13569 remote outlet switch
     def __init__(self):
         room = 'lr'
         thing = 'Heater'
         self.name = room + thing
         self.Name = room.upper() + thing
-        onPin = np.nan
-        offPin = np.nan
-        WoodsOutlet.__init__(self, onPin, offPin)
+        self.outletID = 'F2'    # i.e. CH F, channel 2
+        RFOutlet.__init__(self, self.outletID)
 
 
 
