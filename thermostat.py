@@ -15,13 +15,12 @@ import sys
 import subprocess
 import traceback
 
-try:
-    sensor = DS18B20()
-except IndexError:     # list index out of range, i.e. no DS18B20 plugged in
-    sensor = DHT()
-
 
 def readDining():
+    try:
+        sensor = DS18B20()
+    except IndexError:     # list index out of range, i.e. no DS18B20 plugged in
+        sensor = DHT()
     data = sensor.read()
     temp = None
     hum = None
@@ -52,6 +51,7 @@ def readBed():
         hum = float(textList[6])
     else:
         sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
+        return None
     return temp
 
 
@@ -120,9 +120,9 @@ class Actuators:
 #configFile = './fanProgram.txt'
 configFile = './heatProgram.txt'
 
-if configFile.find('Winter') > -1 or configFile.find('heat') > -1:
+if configFile.find('heat') > -1:
     controlType = 'heating'
-elif configFile.find('Summer') > -1 or configFile.find('fan') > -1:
+elif configFile.find('fan') > -1:
     controlType = 'cooling'
 
 log = Logger('logs/thermostat.txt')
