@@ -113,7 +113,7 @@ def determineThreshRoom(configFile):
     # if controlType == 'cooling':
     #     programFile = "./fanProgram.txt"
     # elif controlType == 'heating':
-    #     programFile = "./thermostatProgram.txt"
+    #     programFile = "./heatProgram.txt"
 
     # Determine if weekend or weekday and current time
     [currentTime, dayType] = determineDayTypeAndTime()
@@ -148,3 +148,4 @@ def determineThreshRoom(configFile):
 
     # return threshold temp and room to read from
     return float(thresh), readRoom
+
