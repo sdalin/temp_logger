@@ -18,9 +18,9 @@ import traceback
 
 
 def cleanUp():
-    GPIO.cleanup()
     b = Boiler()
     b.turnOff()
+    GPIO.cleanup()
 
 
 
@@ -122,7 +122,10 @@ class DRTemperature:
         self.sensor = DHT()
 
     def read(self):
-        return self.sensor.read(self.unit)
+        data = self.sensor.read(self.unit)
+        temp = data[0]
+        hum = data[1]
+        return temp
 
 
 
