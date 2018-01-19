@@ -276,35 +276,28 @@ configFile = 'config.json'
 
 boiler = Boiler()
 brTemperature = BRTemperature()
+brCooler = BRCooler()
 brHumidity = BRHumidity()
 brHumidifier = BRHumidifier()
 drTemperature = DRTemperature()
 lrTemperature = LRTemperature()
 lrHeater = LRHeater()
 # controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
-# bedTemp, bedHum, livingTemp, diningTemp
-controls = {'bedTemp': {'v': brTemperature, 'a': boiler},
-            'bedHum': {'v': brHumidity, 'a': brHumidifier},
-            'diningTemp': {'v': drTemperature, 'a': boiler},
-            'livingTemp': {'v': lrTemperature, 'a': lrHeater}}
+controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController},
+            'bedCool': {'v': brTemperature, 'a': boiler, 'c': decreaseController},
+            'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController},
+            'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController},
+            'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController},
+            }
 while implemented and __name__ == "__main__":
     try:
         startTime = time.time()
         optimizees = readThreshFromConfigFile(configFile)
         for optimizee in optimizees:
-            if configFile.find('Summer') > -1 and optimizee[-4:] == 'Temp':
-                success = decreaseController(optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
-            else:
-                success = increaseController(optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
-
+            success = controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
             if not success:
-                nFailures += 1
-                if nFailures >= 3:
-                    text = 'Failure in control of {0}'.format(optimizee)
-                    sendEmail('Thermostat Shutdown', text)
-                    raise Exception(text)
-                else:
-                    pass
+                text = 'Failure in control of {0}'.format(optimizee)
+                raise Exception(text)
 
         endTime = time.time()
         elapsedTime = endTime - startTime

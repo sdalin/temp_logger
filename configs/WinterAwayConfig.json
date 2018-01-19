@@ -3,14 +3,14 @@
     {
     "00:00":
         {
-        "diningTemp": 55
+        "diningHeat": 55
         }
     },
 "end":
     {
     "00:00":
         {
-        "diningTemp": 55
+        "diningHeat": 55
         }
     }
 }
