@@ -4,8 +4,9 @@ from functions import *
 
 try:
     import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BCM)
 except RuntimeError:
-    print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  "
+    raise("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  "
           "You can achieve this by using 'sudo' to run your script")
 import time
 from sensors import *
@@ -151,7 +152,7 @@ class WoodsOutlet:
 class RFOutlet:
     # uses rfsniffer to play codes captured with 315 or 433 MHz radios attached to RPi
     def __init__(self, outletID):
-        self.txPin = 11     # in GPIO.BOARD numbering; =17 in BCM numbering
+        self.txPin = 17 #11     # in GPIO.BOARD numbering; =17 in BCM numbering
         self.buttondb = './buttons.db'
         self.outletID = outletID
 

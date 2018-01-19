@@ -31,11 +31,15 @@ import os
 import shelve
 import time
 import warnings
+import sys
 
 try:
-    import RPi.GPIO as GPIO
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
+    if 'RPi.GPIO' not in sys.modules:
+        import RPi.GPIO as GPIO
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BOARD)
+    else:
+        import RPi.GPIO as GPIO
 except RuntimeError:
     # Catch here so that we can actually test on non-pi targets
     warnings.warn('This can only be executed on Raspberry Pi', RuntimeWarning)
