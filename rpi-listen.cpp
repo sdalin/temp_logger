@@ -74,26 +74,32 @@ void loop(void)
     uint8_t pipe_num;
     while (radio.available(&pipe_num))
     {
-        int slen = 32;
-        char buffer[slen] = "";
-        time_t rawtime;
-        timestring(&rawtime, buffer, slen);
-        
-        int len = radio.getDynamicPayloadSize();
-        
-        // read from radio
-        char message[len] = "";
-        getMessage(message, len);
-        
-        // write to file and close
-        ofstream myfile;
-        myfile.open ("/var/tmp/rf24weather.txt");
-        myfile << buffer << ' ' << rawtime << '\t' << message << endl;
-        myfile.close();
-        myfile.open ("logs/temp_hum.txt",ofstream::app);
-        myfile << buffer << ' ' << rawtime << '\t' << message << endl;
-        //myfile << rxBuffer << ':' << rawtime << endl;
-        myfile.close();
+        printf("pipe #: %u\n", pipe_num);
+        fflush(stdout);
+        if (pipe_num == 0) {
+            setup();
+        } else {
+            int slen = 32;
+            char buffer[slen] = "";
+            time_t rawtime;
+            timestring(&rawtime, buffer, slen);
+            
+            int len = radio.getDynamicPayloadSize();
+            
+            // read from radio
+            char message[len] = "";
+            getMessage(message, len);
+            
+            // write to file and close
+            ofstream myfile;
+            myfile.open ("/var/tmp/rf24weather.txt");
+            myfile << buffer << ' ' << rawtime << '\t' << message << endl;
+            myfile.close();
+            myfile.open ("logs/temp_hum.txt",ofstream::app);
+            myfile << buffer << ' ' << rawtime << '\t' << message << endl;
+            //myfile << rxBuffer << ':' << rawtime << endl;
+            myfile.close();
+        }
     }
             
     // pause to reduce cpu load
