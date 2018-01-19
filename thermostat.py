@@ -23,26 +23,6 @@ def cleanUp():
     GPIO.cleanup()
 
 
-
-def readDining():
-    try:
-        sensor = DS18B20()
-    except IndexError:  # list index out of range, i.e. no DS18B20 plugged in
-        sensor = DHT()
-    data = sensor.read()
-    temp = None
-    hum = None
-    if type(data) is tuple:
-        temp = data[0]
-        hum = data[1]
-    elif type(data) is float:
-        temp = data
-        hum = None
-    if temp is not None:
-        temp = float(temp)*1.8+32
-    return temp
-
-
 def readBed():
     filename = 'logs/temp_hum.txt'
     searchterm = 'E2'
@@ -61,15 +41,6 @@ def readBed():
     else:
         sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
         return None, None
-
-
-def readRoom(room='dining'):
-    if room.lower() == 'dining':
-        return readDining()
-    elif room.lower() == 'bed':
-        return readBed()
-    else:
-        raise ValueError
 
 
 # list of data sources:  bedroom temp, bedroom hum, living room temp, dining room temp, dining room hum
@@ -126,7 +97,6 @@ class DRTemperature:
         temp = data[0]
         hum = data[1]
         return temp
-
 
 
 
@@ -351,6 +321,35 @@ while implemented and __name__ == "__main__":
         else:
             sendEmail('Thermostat Error', text)
 
+
+#
+#
+# def readDining():
+#     try:
+#         sensor = DS18B20()
+#     except IndexError:  # list index out of range, i.e. no DS18B20 plugged in
+#         sensor = DHT()
+#     data = sensor.read()
+#     temp = None
+#     hum = None
+#     if type(data) is tuple:
+#         temp = data[0]
+#         hum = data[1]
+#     elif type(data) is float:
+#         temp = data
+#         hum = None
+#     if temp is not None:
+#         temp = float(temp)*1.8+32
+#     return temp
+#
+#
+# def readRoom(room='dining'):
+#     if room.lower() == 'dining':
+#         return readDining()
+#     elif room.lower() == 'bed':
+#         return readBed()
+#     else:
+#         raise ValueError
 #
 # class ActuatorsContextManager:
 #     def __init__(self):
