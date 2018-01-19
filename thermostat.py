@@ -181,7 +181,7 @@ class WoodsOutlet:
 class RFOutlet:
     # uses rfsniffer to play codes captured with 315 or 433 MHz radios attached to RPi
     def __init__(self, outletID):
-        self.txPin = 17
+        self.txPin = 11     # in GPIO.BOARD numbering; =17 in BCM numbering
         self.buttondb = './buttons.db'
         self.outletID = outletID
 
