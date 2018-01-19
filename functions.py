@@ -3,6 +3,7 @@ import requests
 import simplejson as json
 import getpass
 import socket
+import time
 
 
 def p2f(x):
@@ -23,7 +24,7 @@ def sendEmail(subject=None, text=None):
     if subject is not None:
         email['subject'] = subject
     if text is not None:
-        email['text_body'] = text
+        email['text_body'] = time.asctime() + "\n" + text
     response = requests.post(url+'email/send', data=json.dumps(email))
     data = response.json()['data']
     if 'error_code' in data:
