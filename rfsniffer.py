@@ -45,7 +45,8 @@ rfsnifferdir = os.path.split(os.path.realpath(__name__))[0]
 defaultpath = os.path.join(rfsnifferdir, 'buttons.db')
 def play(txpin, buttonName, buttonsdb=defaultpath):
     GPIO.setup(txpin, GPIO.OUT, initial=GPIO.LOW)
-    for i, (timing, level) in enumerate(buttonsdb[buttonName]):
+    buttons = shelve.open(buttonsdb)
+    for i, (timing, level) in enumerate(buttons[buttonName]):
         if i is not 0:
             # Busy-sleep (gives a better time granularity than
             # sleep() but at the cost of busy looping)
