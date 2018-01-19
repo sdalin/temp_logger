@@ -19,7 +19,8 @@ import traceback
 
 def cleanUp():
     GPIO.cleanup()
-    Boiler.turnOff()
+    b = Boiler()
+    b.turnOff()
 
 
 
