@@ -18,8 +18,8 @@ import traceback
 
 
 def cleanUp():
-    b = Boiler()
-    b.turnOff()
+    boiler.turnOff()
+    lrHeater.turnOff()
     GPIO.cleanup()
 
 
@@ -290,6 +290,7 @@ controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController},
             }
 while implemented and __name__ == "__main__":
+    lastOptimizees = {}
     try:
         startTime = time.time()
         optimizees = readThreshFromConfigFile(configFile)
@@ -298,7 +299,10 @@ while implemented and __name__ == "__main__":
             if not success:
                 text = 'Failure in control of {0}'.format(optimizee)
                 raise Exception(text)
-
+        orphans = [lo for lo in lastOptimizees if lo not in optimizees]
+        for optimizee in orphans:
+            lastOptimizees[optimizee]['a'].turnOff()
+        lastOptimizees = optimizees
         endTime = time.time()
         elapsedTime = endTime - startTime
         print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
