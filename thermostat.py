@@ -315,7 +315,6 @@ while implemented and __name__ == "__main__":
         endTime = time.time()
         elapsedTime = endTime - startTime
         print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
-        time.sleep(max(1 * 60 - elapsedTime, 0))
     except Exception:
         nFailures += 1
         text = 'Failure ' + str(nFailures) + '\n' + traceback.format_exc()
@@ -326,3 +325,4 @@ while implemented and __name__ == "__main__":
             raise
         else:
             sendEmail('Thermostat Error', text)
+    time.sleep(max(1 * 60 - elapsedTime, 0))
