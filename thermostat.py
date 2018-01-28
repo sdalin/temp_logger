@@ -297,14 +297,14 @@ configFile = 'config.json'
 
 boiler = Boiler()
 brTemperature = BRTemperature()
-brCooler = BRCooler()
+#brCooler = BRCooler()
+# brHumdifier and brCooler are identical
 brHumidity = BRHumidity()
 brHumidifier = BRHumidifier()
 drTemperature = DRTemperature()
 lrTemperature = LRTemperature()
 lrHeater = LRHeater()
 actuators = [boiler,
-             brCooler,
              brHumidifier,
              lrHeater,
              ]
@@ -315,7 +315,7 @@ sensors = [brTemperature,
            ]
 # controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
 controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
-            'bedCool': {'v': brTemperature, 'a': boiler, 'c': decreaseController, 'h': 1},
+            'bedCool': {'v': brTemperature, 'a': BRHumidifier, 'c': decreaseController, 'h': 1},
             'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController, 'h': 5},
             'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 1},
