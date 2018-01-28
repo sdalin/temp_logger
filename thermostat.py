@@ -279,11 +279,11 @@ drTemperature = DRTemperature()
 lrTemperature = LRTemperature()
 lrHeater = LRHeater()
 # controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
-controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController},
-            'bedCool': {'v': brTemperature, 'a': boiler, 'c': decreaseController},
-            'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController},
-            'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController},
-            'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController},
+controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
+            'bedCool': {'v': brTemperature, 'a': boiler, 'c': decreaseController, 'h': 1},
+            'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController, 'h': 5},
+            'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
+            'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 1},
             }
 lastOptimizees = {}
 while implemented and __name__ == "__main__":
@@ -291,7 +291,8 @@ while implemented and __name__ == "__main__":
     try:
         optimizees = readThreshFromConfigFile(configFile)
         for optimizee in optimizees:
-            success = controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
+            success = controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'],
+                                               controls[optimizee]['a'], controls[optimizee]['h'])
             if not success:
                 text = 'Failure in control of {0}'.format(optimizee)
                 raise Exception(text)
