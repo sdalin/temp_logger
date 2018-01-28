@@ -285,7 +285,6 @@ controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController
             'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 1},
             }
-lastOptimizees = {}
 while implemented and __name__ == "__main__":
     startTime = time.time()
     try:
