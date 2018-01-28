@@ -324,7 +324,7 @@ errorHandler = ErrorHandler()
 while implemented and __name__ == "__main__":
     startTime = time.time()
     try:
-        unusedActuators = actuators
+        unusedActuators = list(actuators)
         optimizees = readThreshFromConfigFile(configFile)
         for optimizee in optimizees:
             try:
@@ -334,8 +334,9 @@ while implemented and __name__ == "__main__":
                     unusedActuators.remove(controls[optimizee]['a'])
             except ThermostatSensorError:
                 errorHandler.handle()
+        log.write('Turning off unusedActuators: ' + str(unusedActuators))
         for actuator in unusedActuators:
-            actuators.turnOff()
+            actuator.turnOff()
     except Exception:
         errorHandler.handle()
     endTime = time.time()
