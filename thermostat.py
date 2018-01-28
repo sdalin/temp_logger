@@ -24,15 +24,23 @@ def cleanUp():
     GPIO.cleanup()
 
 
-def readBed():
-    filename = 'logs/temp_hum.txt'
-    searchterm = 'E2'
+def tailgrep(filename, searchterm):
     if sys.platform == 'linux2':
         p1 = subprocess.Popen(['tac', filename], stdout=subprocess.PIPE)
     elif sys.platform == 'darwin':
         p1 = subprocess.Popen(['tail', '-r', filename], stdout=subprocess.PIPE)
     p2 = subprocess.Popen(['grep', '-m1', searchterm], stdin=p1.stdout, stdout=subprocess.PIPE)
     text = p2.communicate()[0]
+    p1.terminate()
+    p2.terminate()
+    return text
+
+
+
+def readBed():
+    filename = 'logs/temp_hum.txt'
+    searchterm = 'E2'
+    text = tailgrep(filename, searchterm)
     textList = text.split()
     # TODO: make some assertions about integrity of text in that line
     if time.time() - int(textList[2]) < 5*60:
@@ -271,6 +279,7 @@ def decreaseController(setpoint, inputObj, actuator, hysteresis=1):
 
 implemented = True
 nFailures = 0
+lastOptimizees = {}
 log = Logger('logs/thermostat.txt')
 
 configFile = 'config.json'

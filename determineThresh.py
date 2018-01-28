@@ -42,7 +42,7 @@ def determineDayTypeAndTime():
 
     try:
         # Read the chag days JSON already stored
-        f = codecs.open('chagDays.json','r', 'utf-8')
+        f = codecs.open('chagDays.json', 'r', 'utf-8')
         output = f.read()
         dictionary = json.loads(output)
         f.close()
@@ -62,14 +62,10 @@ def determineDayTypeAndTime():
         dataCurrent = False
 
     # If there wasn't candle lighting in the past week in the stored data, we need new data
-    if dataCurrent == False:
-        try:
-            output = requests.get(
-                'http://www.hebcal.com/hebcal/?v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on')
-        except requests.exceptions.ConnectionError:
-            # If the API request fails once its generally OK to use yesterdays' data.
-            pass
-
+    # TODO: try to pre-emptively download data before its urgent
+    if not dataCurrent:
+        urlparams = 'v=1&cfg=json&maj=off&min=off&mod=off&nx=on&year=now&month=x&ss=off&mf=on&c=on&geo=zip&zip=02143&b=18&m=50&s=on'
+        output = requests.get('http://www.hebcal.com/hebcal/?' + urlparams)
         # Write new data and load into variable to create dict
         f = codecs.open('chagDays.json', 'w', 'utf-8')
         f.write(json.dumps(json.loads(output.text), indent=2))
@@ -83,6 +79,9 @@ def determineDayTypeAndTime():
     # check if there was candle lighting yesterday
     holidayDates = holidays.keys()
     if yesterday in holidayDates:
+        dayType = 'end'
+    elif todayYMD in holidayDates and currentDateTime.hour > 14:
+        # start weekend program at 2pm on days with candle lighting
         dayType = 'end'
 
     return currentTime, dayType
