@@ -285,9 +285,10 @@ controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController
             'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController},
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController},
             }
+lastOptimizees = {}
 while implemented and __name__ == "__main__":
+    startTime = time.time()
     try:
-        startTime = time.time()
         optimizees = readThreshFromConfigFile(configFile)
         for optimizee in optimizees:
             success = controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
@@ -298,9 +299,6 @@ while implemented and __name__ == "__main__":
         for optimizee in orphans:
             lastOptimizees[optimizee]['a'].turnOff()
         lastOptimizees = optimizees
-        endTime = time.time()
-        elapsedTime = endTime - startTime
-        print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
     except Exception:
         nFailures += 1
         text = 'Failure ' + str(nFailures) + '\n' + traceback.format_exc()
@@ -311,4 +309,7 @@ while implemented and __name__ == "__main__":
             raise
         else:
             sendEmail('Thermostat Error', text)
+    endTime = time.time()
+    elapsedTime = endTime - startTime
+    print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
     time.sleep(max(1 * 60 - elapsedTime, 0))
