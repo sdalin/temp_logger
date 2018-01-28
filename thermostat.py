@@ -17,6 +17,10 @@ import datetime
 import time
 
 
+class ThermostatSensorError(StandardError):
+    """" raise this when there's an error reading a sensor """
+
+
 def cleanUp():
     boiler.turnOff()
     lrHeater.turnOff()
@@ -34,8 +38,8 @@ def readBed():
         hum = float(textList[6])
         return temp, hum
     else:
-        #sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
-        raise IOError('No recent temperature data coming in over radio. Last line:\n' + text)
+        #sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + line)
+        raise ThermostatSensorError('No recent temperature data coming in over radio. Last line:\n' + line)
 
 
 # list of data sources:  bedroom temp, bedroom hum, living room temp, dining room temp, dining room hum
@@ -201,7 +205,6 @@ def increaseController(setpoint, inputObj, actuator, hysteresis=1):
     # hysteresis should be amount of acceptable variation from setpoint
     sensorValue = inputObj.read()
     textList = [actuator.Name, sensorValue, inputObj.unit, inputObj.room, setpoint, inputObj.type]
-    failed = False
     if sensorValue is not None:
         if sensorValue < setpoint - hysteresis:
             actuator.turnOn()
@@ -213,7 +216,7 @@ def increaseController(setpoint, inputObj, actuator, hysteresis=1):
             log.write('No {0} change: {1:.1f}{2} in {3} room is near setpoint of {4}{2}'.format(*textList))
     else:
         log.write(time.asctime() + ": {3} room {5} read failed.".format(*textList))
-        failed = True
+        raise ThermostatSensorError('{3} room {5} read failed.'.format(*textList))
     try:
         if actuator.isOn():
             log.write('Magic 8 ball says heater is probably on.')
@@ -221,10 +224,6 @@ def increaseController(setpoint, inputObj, actuator, hysteresis=1):
             log.write('Magic 8 ball says heater is probably off.')
     except AttributeError:      # this actuator has no isOn()
         pass
-    if failed:
-        return False
-    else:
-        return True
 
 
 def decreaseController(setpoint, inputObj, actuator, hysteresis=1):
@@ -234,7 +233,6 @@ def decreaseController(setpoint, inputObj, actuator, hysteresis=1):
     # hysteresis should be amount of acceptable variation from setpoint
     sensorValue = inputObj.read()
     textList = [actuator.Name, sensorValue, inputObj.unit, inputObj.room, setpoint, inputObj.type]
-    failed = False
     if sensorValue is not None:
         if sensorValue > setpoint + hysteresis:
             actuator.turnOn()
@@ -246,7 +244,7 @@ def decreaseController(setpoint, inputObj, actuator, hysteresis=1):
             log.write('No {0} change: {1:.1f}{2} in {3} room is near setpoint of {4}{2}'.format(*textList))
     else:
         log.write(time.asctime() + ": {3} room {5} read failed.".format(*textList))
-        failed = True
+        raise ThermostatSensorError('{3} room {5} read failed.'.format(*textList))
     try:
         # so far only heater has way to check if it's on or off
         if actuator.isOn():
@@ -255,17 +253,44 @@ def decreaseController(setpoint, inputObj, actuator, hysteresis=1):
             log.write('Magic 8 ball says heater is probably off.')
     except AttributeError:  # this actuator has no isOn()
         pass
-    if failed:
-        return False
-    else:
-        return True
+
+
+class ErrorHandler:
+    def __init__(self):
+        self.nFailures = 0
+        self.lastException = ''
+        self.runningText = ''
+        self.lastEmailTime = 0
+
+    def handle(self):
+        self.nFailures += 1
+        text = 'Failure ' + str(self.nFailures) + '\n' + traceback.format_exc()
+        log.write(text)
+        if self.lastException == traceback.format_exc():
+            if self.nFailures == 1:
+                self.runningText += text + "\n"
+            else:
+                self.runningText += time.asctime() + 'Failure ' + str(self.nFailures) + ': Same error.' + "\n"
+            if (datetime.datetime.now() - self.lastEmailTime).total_seconds() < 60 * 60 * 12:
+                pass
+            else:
+                sendEmail('Thermostat Error', self.runningText)
+                self.lastEmailTime = datetime.datetime.now()
+                self.runningText = ''
+        else:
+            if self.runningText:
+                sendEmail('Thermostat Error', self.runningText)
+                self.runningText = ''
+            sendEmail('Thermostat Error', text)
+            self.lastEmailTime = datetime.datetime.now()
+        self.lastException = traceback.format_exc()
+
+
 
 
 ######## Main loop #########
 
 implemented = True
-nFailures = 0
-lastOptimizees = {}
 log = Logger('logs/thermostat.txt')
 
 configFile = 'config.json'
@@ -278,6 +303,16 @@ brHumidifier = BRHumidifier()
 drTemperature = DRTemperature()
 lrTemperature = LRTemperature()
 lrHeater = LRHeater()
+actuators = [boiler,
+             brCooler,
+             brHumidifier,
+             lrHeater,
+             ]
+sensors = [brTemperature,
+           brHumidity,
+           drTemperature,
+           lrTemperature,
+           ]
 # controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
 controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
             'bedCool': {'v': brTemperature, 'a': boiler, 'c': decreaseController, 'h': 1},
@@ -285,30 +320,24 @@ controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController
             'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 1},
             }
+errorHandler = ErrorHandler()
 while implemented and __name__ == "__main__":
     startTime = time.time()
     try:
+        unusedActuators = actuators
         optimizees = readThreshFromConfigFile(configFile)
         for optimizee in optimizees:
-            success = controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'],
-                                               controls[optimizee]['a'], controls[optimizee]['h'])
-            if not success:
-                text = 'Failure in control of {0}'.format(optimizee)
-                raise Exception(text)
-        orphans = [lo for lo in lastOptimizees if lo not in optimizees]
-        for optimizee in orphans:
-            lastOptimizees[optimizee]['a'].turnOff()
-        lastOptimizees = optimizees
+            try:
+                controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'],
+                                         controls[optimizee]['a'], controls[optimizee]['h'])
+                if controls[optimizee]['a'] in unusedActuators:
+                    unusedActuators.remove(controls[optimizee]['a'])
+            except ThermostatSensorError:
+                errorHandler.handle()
+        for actuator in unusedActuators:
+            actuators.turnOff()
     except Exception:
-        nFailures += 1
-        text = 'Failure ' + str(nFailures) + '\n' + traceback.format_exc()
-        log.write(text)
-        if nFailures >= 3:
-            sendEmail('Thermostat Shutdown', text)
-            cleanUp()
-            raise
-        else:
-            sendEmail('Thermostat Error', text)
+        errorHandler.handle()
     endTime = time.time()
     elapsedTime = endTime - startTime
     print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
