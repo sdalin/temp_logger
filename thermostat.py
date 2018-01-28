@@ -26,8 +26,8 @@ def cleanUp():
 def readBed():
     filename = 'logs/temp_hum.txt'
     searchterm = 'E2'
-    text = tailgrep(filename, searchterm)
-    textList = text.split()
+    line = tailgrep(filename, searchterm)
+    textList = line.split()
     # TODO: make some assertions about integrity of text in that line
     if time.time() - int(textList[2]) < 5*60:
         temp = float(textList[5])

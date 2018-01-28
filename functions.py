@@ -24,7 +24,6 @@ def tailgrep(filename, searchterm):
     p2 = subprocess.Popen(['grep', '-m1', searchterm], stdin=p1.stdout, stdout=subprocess.PIPE)
     text = p2.communicate()[0]
     p1.terminate()
-    p2.terminate()
     return text
 
 
