@@ -279,6 +279,7 @@ def decreaseController(setpoint, inputObj, actuator, hysteresis=1):
 
 implemented = True
 nFailures = 0
+lastOptimizees = {}
 log = Logger('logs/thermostat.txt')
 
 configFile = 'config.json'
@@ -299,7 +300,6 @@ controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController},
             }
 while implemented and __name__ == "__main__":
-    lastOptimizees = {}
     try:
         startTime = time.time()
         optimizees = readThreshFromConfigFile(configFile)
