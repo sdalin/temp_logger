@@ -80,6 +80,9 @@ def determineDayTypeAndTime():
     holidayDates = holidays.keys()
     if yesterday in holidayDates:
         dayType = 'end'
+    elif todayYMD in holidayDates and currentDateTime.hour > 14:
+        # start weekend program at 2pm on days with candle lighting
+        dayType = 'end'
 
     return currentTime, dayType
 
