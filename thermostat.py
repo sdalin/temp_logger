@@ -8,33 +8,19 @@ try:
 except RuntimeError:
     raise("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  "
           "You can achieve this by using 'sudo' to run your script")
-import time
 from sensors import *
 import rfsniffer
 from logger import Logger
 
-import sys
-import subprocess
 import traceback
+import datetime
+import time
 
 
 def cleanUp():
     boiler.turnOff()
     lrHeater.turnOff()
     GPIO.cleanup()
-
-
-def tailgrep(filename, searchterm):
-    if sys.platform == 'linux2':
-        p1 = subprocess.Popen(['tac', filename], stdout=subprocess.PIPE)
-    elif sys.platform == 'darwin':
-        p1 = subprocess.Popen(['tail', '-r', filename], stdout=subprocess.PIPE)
-    p2 = subprocess.Popen(['grep', '-m1', searchterm], stdin=p1.stdout, stdout=subprocess.PIPE)
-    text = p2.communicate()[0]
-    p1.terminate()
-    p2.terminate()
-    return text
-
 
 
 def readBed():
@@ -48,8 +34,8 @@ def readBed():
         hum = float(textList[6])
         return temp, hum
     else:
-        sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
-        return None, None
+        #sendEmail('From Thermostat', 'No recent temperature data coming in over radio. Last line:\n' + text)
+        raise IOError('No recent temperature data coming in over radio. Last line:\n' + text)
 
 
 # list of data sources:  bedroom temp, bedroom hum, living room temp, dining room temp, dining room hum

@@ -1,9 +1,11 @@
 import numpy as np
 import requests
-import simplejson as json
+import json
 import getpass
 import socket
 import time
+import sys
+import subprocess
 
 
 def p2f(x):
@@ -11,6 +13,19 @@ def p2f(x):
         return float(x.rstrip('%'))
     except Exception:
         return np.nan
+
+
+def tailgrep(filename, searchterm):
+    # also try checking out file_read_backwards
+    if sys.platform == 'linux2':
+        p1 = subprocess.Popen(['tac', filename], stdout=subprocess.PIPE)
+    elif sys.platform == 'darwin':
+        p1 = subprocess.Popen(['tail', '-r', filename], stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['grep', '-m1', searchterm], stdin=p1.stdout, stdout=subprocess.PIPE)
+    text = p2.communicate()[0]
+    p1.terminate()
+    p2.terminate()
+    return text
 
 
 def sendEmail(subject=None, text=None):
