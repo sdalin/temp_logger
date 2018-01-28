@@ -32,7 +32,6 @@ def tailgrep(filename, searchterm):
     p2 = subprocess.Popen(['grep', '-m1', searchterm], stdin=p1.stdout, stdout=subprocess.PIPE)
     text = p2.communicate()[0]
     p1.terminate()
-    p2.terminate()
     return text
 
 
@@ -301,8 +300,8 @@ controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController
             }
 lastOptimizees = {}
 while implemented and __name__ == "__main__":
+    startTime = time.time()
     try:
-        startTime = time.time()
         optimizees = readThreshFromConfigFile(configFile)
         for optimizee in optimizees:
             success = controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'], controls[optimizee]['a'])
@@ -323,7 +322,7 @@ while implemented and __name__ == "__main__":
             raise
         else:
             sendEmail('Thermostat Error', text)
-    print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
     endTime = time.time()
     elapsedTime = endTime - startTime
+    print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
     time.sleep(max(1 * 60 - elapsedTime, 0))
