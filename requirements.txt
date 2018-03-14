@@ -1,0 +1,8 @@
+Adafruit-Python-DHT>=1.1.2
+requests>=2.4.3
+RPi.GPIO>=0.6.3
+# file-read-backwards
+# numpy
+# matplotlib
+# pandas
+# virtualenv
