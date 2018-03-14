@@ -33,7 +33,7 @@ def readBed():
     line = tailgrep(filename, searchterm)
     textList = line.split()
     # TODO: make some assertions about integrity of text in that line
-    if time.time() - int(textList[2]) < 5*60:
+    if time.time() - int(textList[2]) < 15*60:
         temp = float(textList[5])
         hum = float(textList[6])
         return temp, hum
@@ -328,10 +328,10 @@ while implemented and __name__ == "__main__":
         optimizees = readThreshFromConfigFile(configFile)
         for optimizee in optimizees:
             try:
-                controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'],
-                                         controls[optimizee]['a'], controls[optimizee]['h'])
                 if controls[optimizee]['a'] in unusedActuators:
                     unusedActuators.remove(controls[optimizee]['a'])
+                controls[optimizee]['c'](optimizees[optimizee], controls[optimizee]['v'],
+                                         controls[optimizee]['a'], controls[optimizee]['h'])
             except ThermostatSensorError:
                 errorHandler.handle()
         log.write('Turning off unusedActuators: ' + str(unusedActuators))
@@ -342,4 +342,4 @@ while implemented and __name__ == "__main__":
     endTime = time.time()
     elapsedTime = endTime - startTime
     print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
-    time.sleep(max(1 * 60 - elapsedTime, 0))
+    time.sleep(max(5 * 60 - elapsedTime, 0))
