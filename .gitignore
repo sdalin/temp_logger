@@ -8,3 +8,5 @@ nohup.out
 rpi-listen
 logs/*
 venv
+chagDays.json
+config.json

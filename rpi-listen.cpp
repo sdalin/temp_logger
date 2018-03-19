@@ -74,16 +74,15 @@ void loop(void)
     uint8_t pipe_num;
     while (radio.available(&pipe_num))
     {
-        printf("pipe #: %u\n", pipe_num);
+        int slen = 32;
+        char buffer[slen] = "";
+        time_t rawtime;
+        timestring(&rawtime, buffer, slen);
+        printf("%s\tpipe #: %u\n", buffer, pipe_num);
         fflush(stdout);
         if (pipe_num == 0) {
             setup();
         } else {
-            int slen = 32;
-            char buffer[slen] = "";
-            time_t rawtime;
-            timestring(&rawtime, buffer, slen);
-            
             int len = radio.getDynamicPayloadSize();
             
             // read from radio
