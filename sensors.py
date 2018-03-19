@@ -20,7 +20,7 @@ class DS18B20:
         tfile.close()
         retries = 0
         while not text and retries < 10:
-            print time.asctime() + ': couldn''t read from "' + self.device + '". Trying again. '
+            print(time.asctime() + ': couldn''t read from "' + self.device + '". Trying again. ')
             time.sleep(1)
             tfile = open(self.device)
             text = tfile.read()

@@ -266,7 +266,7 @@ class ErrorHandler:
         self.nFailures += 1
         text = 'Failure ' + str(self.nFailures) + '\n' + traceback.format_exc()
         log.write(text)
-        if self.lastException == traceback.format_exc():
+        if self.lastException == traceback.format_exception_only(*sys.exc_info()[:2])[0]:
             if self.nFailures == 1:
                 self.runningText += text + "\n"
             else:
@@ -283,7 +283,7 @@ class ErrorHandler:
                 self.runningText = ''
             sendEmail('Thermostat Error', text)
             self.lastEmailTime = datetime.datetime.now()
-        self.lastException = traceback.format_exc()
+        self.lastException = traceback.format_exception_only(*sys.exc_info()[:2])[0]
 
 
 
