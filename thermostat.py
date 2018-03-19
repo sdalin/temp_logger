@@ -316,7 +316,7 @@ sensors = [brTemperature,
 # controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
 controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
             'bedCool': {'v': brTemperature, 'a': BRHumidifier, 'c': decreaseController, 'h': 1},
-            'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController, 'h': 5},
+            'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController, 'h': 3},
             'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 1},
             }
@@ -342,4 +342,6 @@ while implemented and __name__ == "__main__":
     endTime = time.time()
     elapsedTime = endTime - startTime
     print(time.asctime() + ": thermostat.py elapsed time: " + str(elapsedTime))
-    time.sleep(max(5 * 60 - elapsedTime, 0))
+    sleepTime = max(5 * 60 - elapsedTime, 0)
+    os.system('sleep ' + str(sleepTime))
+

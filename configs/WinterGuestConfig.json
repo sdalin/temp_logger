@@ -4,13 +4,18 @@
     "00:00":
         {
         "bedHeat": 61,
-        "bedHum": 75,
+        "bedHum": 80,
         "livingHeat": 65
         },
     "07:00":
         {
         "bedHeat": 68,
+        "bedHum": 90,
         "livingHeat": 68
+        },
+    "8:30":
+        {
+        "diningHeat": 68
         },
     "10:30":
         {
@@ -20,10 +25,10 @@
         {
         "diningHeat": 68
         },
-    "23:30":
+    "22:30":
         {
         "bedHeat": 61,
-        "bedHum": 75,
+        "bedHum": 80,
         "livingHeat": 65
         }
     },
@@ -32,10 +37,16 @@
     "00:00":
         {
         "bedHeat": 61,
-        "bedHum": 75,
+        "bedHum": 80,
         "livingHeat": 65
         },
-    "08:30":
+    "08:00":
+        {
+        "bedHeat": 68,
+        "bedHum": 90,
+        "livingHeat": 68
+        },
+    "09:30":
         {
         "diningHeat": 68,
         "livingHeat": 68
@@ -43,17 +54,17 @@
     "14:00":
         {
         "bedHeat": 66,
-        "bedHum": 75,
+        "bedHum": 80,
         "livingHeat": 65
         },
-    "20:00":
+    "18:00":
         {
         "diningHeat": 68
         },
     "23:30":
         {
         "bedHeat": 61,
-        "bedHum": 75,
+        "bedHum": 80,
         "livingHeat": 65
         }
     }

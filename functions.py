@@ -38,6 +38,8 @@ def sendEmail(subject=None, text=None):
     if subject is not None:
         email['subject'] = subject
     if text is not None:
+        text = unicode(text, errors='replace')
+        text = text.encode('ascii', 'replace')
         email['text_body'] = time.asctime() + "\n" + text
     response = requests.post(url+'email/send', data=json.dumps(email))
     data = response.json()['data']
