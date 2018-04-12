@@ -33,11 +33,12 @@ def readBed():
     esp = True
     if esp:
         resp = requests.get('http://192.168.1.101:8081')
+        time.sleep(1)
         d = resp.json()
         temp = float(d['temperature'])*9/5+32
         hum = float(d['humidity'])
         return temp, hum
-    
+
     filename = 'logs/temp_hum.txt'
     searchterm = 'E2'
     line = tailgrep(filename, searchterm)
