@@ -328,11 +328,11 @@ sensors = [brTemperature,
            lrTemperature,
            ]
 # controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
-controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
-            'bedCool': {'v': brTemperature, 'a': brHumidifier, 'c': decreaseController, 'h': 1},
+controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController, 'h': 0.5},
+            'bedCool': {'v': brTemperature, 'a': brHumidifier, 'c': decreaseController, 'h': 0.5},
             'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController, 'h': 3},
-            'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
-            'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 1},
+            'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 0.5},
+            'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 0.5},
             }
 errorHandler = ErrorHandler()
 while implemented and __name__ == "__main__":
