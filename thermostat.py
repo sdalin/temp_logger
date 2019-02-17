@@ -19,7 +19,7 @@ import time
 import requests
 
 
-class ThermostatSensorError(StandardError):
+class ThermostatSensorError(Exception):
     """" raise this when there's an error reading a sensor """
 
 
@@ -33,7 +33,7 @@ def readBed():
     esp = True
     if esp:
         try:
-            resp = requests.get('http://192.168.1.101:8081')
+            resp = requests.get('http://192.168.1.101:8081', timeout=5)
             time.sleep(1)
             d = resp.json()
             temp = float(d['temperature'])*9/5+32
