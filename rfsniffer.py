@@ -47,9 +47,15 @@ except RuntimeError:
 
 rfsnifferdir = os.path.split(os.path.realpath(__name__))[0]
 defaultpath = os.path.join(rfsnifferdir, 'buttons.db')
-def play(txpin, buttonName, buttonsdb=defaultpath):
+defaultdb = shelve.open(defaultpath)
+def play(txpin, buttonName, buttonspath=defaultpath):
+    buttonsdb = shelve.open(buttonspath)
+    inner_play(txpin, buttonName, buttonsdb)
+
+
+# following is a hack bc for some reason parsed_play uses the db itself as an argument whereas play uses the db path as an argument.  so now play() converts db path to db so that both parsed_play and play can call inner_play()
+def inner_play(txpin, buttonName, buttons=defaultdb):
     GPIO.setup(txpin, GPIO.OUT, initial=GPIO.LOW)
-    buttons = shelve.open(buttonsdb)
     for i, (timing, level) in enumerate(buttons[buttonName]):
         if i is not 0:
             # Busy-sleep (gives a better time granularity than
@@ -63,7 +69,7 @@ def play(txpin, buttonName, buttonsdb=defaultpath):
 def parsed_play(args, buttonsdb):
     GPIO.setup(args.txpin, GPIO.OUT, initial=GPIO.LOW)
     for button in args.button:
-        play(args.txpin, button, buttonsdb)
+        inner_play(args.txpin, button, buttonsdb)
 
 
 def read_timings(rx_pin):

@@ -329,7 +329,7 @@ sensors = [brTemperature,
            ]
 # controllers[room-type]['v' or 'a'].  'v' is input/process value, 'a' is actuator
 controls = {'bedHeat': {'v': brTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
-            'bedCool': {'v': brTemperature, 'a': BRHumidifier, 'c': decreaseController, 'h': 1},
+            'bedCool': {'v': brTemperature, 'a': brHumidifier, 'c': decreaseController, 'h': 1},
             'bedHum': {'v': brHumidity, 'a': brHumidifier, 'c': increaseController, 'h': 3},
             'diningHeat': {'v': drTemperature, 'a': boiler, 'c': increaseController, 'h': 1},
             'livingHeat': {'v': lrTemperature, 'a': lrHeater, 'c': increaseController, 'h': 1},
