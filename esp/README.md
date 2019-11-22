@@ -1,3 +1,8 @@
+download ch340
+
+for loading micropython follow instructions here if necessary https://micropython.org/download#esp32
+
+
 to load new code, connect usb
 
 ```
